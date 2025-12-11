@@ -1,96 +1,163 @@
 {% extends "base.html" %}
 
-{% block title %}HarpoTab - Conversion{% endblock %}
+{% block title %}HarpoTab - Convertir{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <h2 class="mb-4">
-            <i class="bi bi-arrow-repeat"></i> Conversion en cours...
-        </h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-arrow-repeat"></i> Convertir une Partition
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="convertForm">
+                        <!-- Upload File -->
+                        <div class="mb-4">
+                            <label for="file" class="form-label fw-bold">
+                                <i class="bi bi-file-earmark-arrow-up"></i> Fichier de partition
+                            </label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="file"
+                                name="file"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                                required
+                            >
+                            <div class="form-text">
+                                Formats acceptés : PDF, PNG, JPEG (max 10 MB)
+                            </div>
+                        </div>
 
-        <!-- Preview Section -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-file-earmark-music"></i> Aperçu de la partition
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="text-center">
-                    {% if filename.lower().endswith('.pdf') %}
-                        <embed src="{{ url_for('preview', filename=filename) }}"
-                               type="application/pdf"
-                               width="100%"
-                               height="600px">
-                    {% else %}
-                        <img src="{{ url_for('preview', filename=filename) }}"
-                             class="img-fluid rounded"
-                             alt="Partition uploadée"
-                             style="max-height: 600px;">
-                    {% endif %}
+                        <!-- Harmonica Type -->
+                        <div class="mb-4">
+                            <label for="harmonica_type" class="form-label fw-bold">
+                                <i class="bi bi-soundwave"></i> Type d'Harmonica
+                            </label>
+                            <select class="form-select" id="harmonica_type" name="harmonica_type" required>
+                                {% for type_key, type_info in harmonica_types.items() %}
+                                    <option value="{{ type_key }}">{{ type_info.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Harmonica Key -->
+                        <div class="mb-4">
+                            <label for="harmonica_key" class="form-label fw-bold">
+                                <i class="bi bi-music-note"></i> Tonalité de l'Harmonica
+                            </label>
+                            <select class="form-select" id="harmonica_key" name="harmonica_key" required>
+                                <!-- Options dynamiques selon le type -->
+                            </select>
+                            <div class="form-text">
+                                Sélectionnez la tonalité de votre harmonica
+                            </div>
+                        </div>
+
+                        <!-- Advanced Options (collapsed) -->
+                        <div class="mb-4">
+                            <button
+                                class="btn btn-outline-secondary btn-sm"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#advancedOptions"
+                            >
+                                <i class="bi bi-gear"></i> Options avancées
+                            </button>
+
+                            <div class="collapse mt-3" id="advancedOptions">
+                                <div class="card card-body bg-light">
+                                    <div class="form-check mb-2">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="auto_transpose"
+                                            name="auto_transpose"
+                                            checked
+                                        >
+                                        <label class="form-check-label" for="auto_transpose">
+                                            Transposition automatique
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="show_chords"
+                                            name="show_chords"
+                                            checked
+                                        >
+                                        <label class="form-check-label" for="show_chords">
+                                            Afficher les accords
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            id="prefer_lower_keys"
+                                            name="prefer_lower_keys"
+                                            checked
+                                        >
+                                        <label class="form-check-label" for="prefer_lower_keys">
+                                            Préférer les tonalités basses
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-repeat"></i> Convertir
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
 
-        <!-- Configuration Summary -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-gear"></i> Configuration
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <strong>Type d'harmonica :</strong><br>
-                        <span class="badge bg-primary">
-                            {{ 'Diatonique 10 trous' if harmonica_type == 'diatonic' else 'Chromatique' }}
-                        </span>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Tonalité :</strong><br>
-                        <span class="badge bg-success">{{ tonality }}</span>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Style de notation :</strong><br>
-                        <span class="badge bg-warning text-dark">
-                            {% if notation_style == 'arrows' %}Flèches (4↑ 5↓)
-                            {% elif notation_style == 'letters' %}Lettres (4B 5D)
-                            {% else %}Symboles (+4 -5)
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
+            <!-- Info Box -->
+            <div class="alert alert-info mt-4">
+                <h6><i class="bi bi-info-circle"></i> Conseils pour de meilleurs résultats</h6>
+                <ul class="mb-0 small">
+                    <li>Utilisez des partitions de bonne qualité (nettes et lisibles)</li>
+                    <li>Privilégiez les partitions simples (une seule mélodie)</li>
+                    <li>Pour les partitions piano, la mélodie (main droite) sera extraite</li>
+                    <li>Le temps de traitement dépend de la complexité de la partition</li>
+                </ul>
             </div>
         </div>
-
-        <!-- Conversion Form -->
-        <form action="{{ url_for('convert') }}" method="POST" id="convertForm">
-            <input type="hidden" name="filename" value="{{ filename }}">
-            <input type="hidden" name="harmonica_type" value="{{ harmonica_type }}">
-            <input type="hidden" name="tonality" value="{{ tonality }}">
-            <input type="hidden" name="notation_style" value="{{ notation_style }}">
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Retour
-                </a>
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="bi bi-magic"></i> Lancer la conversion
-                </button>
-            </div>
-        </form>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.getElementById('convertForm').addEventListener('submit', function(e) {
-        const btn = this.querySelector('button[type="submit"]');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Conversion en cours...';
-        btn.disabled = true;
-    });
+// Mise à jour dynamique des tonalités selon le type d'harmonica
+document.addEventListener('DOMContentLoaded', function() {
+    const harmonicaTypes = {{ harmonica_types | tojson }};
+    const typeSelect = document.getElementById('harmonica_type');
+    const keySelect = document.getElementById('harmonica_key');
+
+    function updateKeys() {
+        const selectedType = typeSelect.value;
+        const keys = harmonicaTypes[selectedType].keys;
+
+        keySelect.innerHTML = '';
+        keys.forEach(key => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            keySelect.appendChild(option);
+        });
+    }
+
+    typeSelect.addEventListener('change', updateKeys);
+    updateKeys(); // Init
+});
 </script>
 {% endblock %}

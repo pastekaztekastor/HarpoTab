@@ -1,7 +1,28 @@
-Flask>=3.0.0
-Werkzeug>=3.0.0
-Pillow>=10.0.0
-PyPDF2>=3.0.0
-reportlab>=4.0.0
-pdfplumber>=0.10.0
-music21>=9.1.0
+# HarpoTab - Requirements Phase 1
+# Python 3.9+
+
+# === Web Framework ===
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# === Image Processing ===
+pillow>=10.0.0
+pdf2image>=1.16.0
+opencv-python>=4.8.0
+
+# === Utilities ===
+python-dotenv>=1.0.0
+
+# === Optional (Image Enhancement) ===
+# tesseract-python>=0.3.0
+
+# === Development ===
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.1.0
+
+# Note: Les dépendances système suivantes doivent être installées séparément:
+# - Audiveris (OCR musical)
+# - Lilypond (génération de partitions)
+# - Poppler (pour pdf2image)
+# - Tesseract (optionnel, pour OCR texte)

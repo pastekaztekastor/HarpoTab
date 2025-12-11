@@ -38,6 +38,14 @@ instance/
 static/uploads/*
 !static/uploads/.gitkeep
 
+# Outputs (fichiers générés)
+static/outputs/*
+!static/outputs/.gitkeep
+
+# Temporary files
+temp/*
+!temp/.gitkeep
+
 # IDE
 .vscode/
 .idea/

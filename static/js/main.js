@@ -1,288 +1,158 @@
-/**
- * HarpoTab - Main JavaScript File
- * Handles client-side interactions and enhancements
- */
+// HarpoTab - Main JavaScript
 
-// Document ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('HarpoTab loaded successfully!');
+    console.log('HarpoTab loaded');
 
-    // Initialize tooltips if Bootstrap is available
-    if (typeof bootstrap !== 'undefined') {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
+    // Initialize tooltips (Bootstrap 5)
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 
-    // File upload preview
-    setupFileUploadPreview();
-
-    // Form validation
-    setupFormValidation();
-
-    // Auto-dismiss alerts
-    autoDismissAlerts();
-});
-
-
-/**
- * Setup file upload preview
- */
-function setupFileUploadPreview() {
+    // File upload validation
     const fileInput = document.getElementById('file');
-
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-
             if (file) {
-                const fileName = file.name;
-                const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
-                const fileType = file.type;
-
-                console.log(`Fichier sélectionné: ${fileName} (${fileSize} MB)`);
-
-                // Vérifier la taille du fichier (max 10 MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('Le fichier est trop volumineux. La taille maximale est de 10 MB.');
-                    fileInput.value = '';
-                    return;
-                }
-
-                // Vérifier le type de fichier
-                const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-                if (!allowedTypes.includes(fileType)) {
-                    alert('Type de fichier non autorisé. Utilisez PDF, PNG ou JPG.');
-                    fileInput.value = '';
-                    return;
-                }
-
-                // Afficher une indication visuelle
-                showFileInfo(fileName, fileSize, fileType);
+                validateFile(file);
             }
         });
     }
-}
 
+    // Form submission handler
+    const convertForm = document.getElementById('convertForm');
+    if (convertForm) {
+        convertForm.addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('file');
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Veuillez sélectionner un fichier');
+                return false;
+            }
+
+            // Show loading state
+            const submitBtn = convertForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Conversion en cours...';
+            }
+        });
+    }
+
+    // Drag and drop support (future enhancement)
+    initDragAndDrop();
+});
+
+/**
+ * Validate uploaded file
+ */
+function validateFile(file) {
+    const maxSize = 10 * 1024 * 1024; // 10 MB
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+
+    // Check size
+    if (file.size > maxSize) {
+        alert('Le fichier est trop volumineux. Taille maximale : 10 MB');
+        document.getElementById('file').value = '';
+        return false;
+    }
+
+    // Check type
+    if (!allowedTypes.includes(file.type)) {
+        alert('Format de fichier non supporté. Utilisez PDF, PNG ou JPEG.');
+        document.getElementById('file').value = '';
+        return false;
+    }
+
+    // Display file info
+    displayFileInfo(file);
+    return true;
+}
 
 /**
  * Display file information
  */
-function showFileInfo(fileName, fileSize, fileType) {
-    // Créer ou mettre à jour l'élément d'information
-    let infoDiv = document.getElementById('file-info');
+function displayFileInfo(file) {
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    console.log(`Fichier sélectionné: ${file.name} (${sizeInMB} MB)`);
 
-    if (!infoDiv) {
-        infoDiv = document.createElement('div');
-        infoDiv.id = 'file-info';
-        infoDiv.className = 'alert alert-info mt-3';
-        document.querySelector('form').appendChild(infoDiv);
+    // Could add visual feedback here
+}
+
+/**
+ * Initialize drag and drop for file upload
+ */
+function initDragAndDrop() {
+    const dropZone = document.querySelector('.drop-zone');
+    if (!dropZone) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
     }
 
-    let icon = '📄';
-    if (fileType.includes('pdf')) {
-        icon = '📕';
-    } else if (fileType.includes('image')) {
-        icon = '🖼️';
-    }
-
-    infoDiv.innerHTML = `
-        <strong>${icon} Fichier sélectionné :</strong> ${fileName} (${fileSize} MB)
-    `;
-}
-
-
-/**
- * Setup form validation
- */
-function setupFormValidation() {
-    const forms = document.querySelectorAll('form');
-
-    forms.forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-
-            form.classList.add('was-validated');
-        }, false);
-    });
-}
-
-
-/**
- * Auto-dismiss alerts after 5 seconds
- */
-function autoDismissAlerts() {
-    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
-
-    alerts.forEach(function(alert) {
-        // Ne pas auto-dismiss les alertes d'erreur
-        if (!alert.classList.contains('alert-danger')) {
-            setTimeout(function() {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }, 5000);
-        }
-    });
-}
-
-
-/**
- * Show loading spinner on button click
- */
-function showLoadingSpinner(button, text = 'Chargement...') {
-    if (!button) return;
-
-    button.disabled = true;
-    button.innerHTML = `
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        ${text}
-    `;
-}
-
-
-/**
- * Copy tablature to clipboard
- */
-function copyTablatureToClipboard() {
-    const tablatureElements = document.querySelectorAll('.tab-notation-badge');
-    const tablature = Array.from(tablatureElements)
-        .map(el => el.textContent)
-        .join(' ');
-
-    navigator.clipboard.writeText(tablature).then(function() {
-        alert('Tablature copiée dans le presse-papiers !');
-    }, function(err) {
-        console.error('Erreur lors de la copie :', err);
-    });
-}
-
-
-/**
- * Print tablature
- */
-function printTablature() {
-    window.print();
-}
-
-
-/**
- * Download file with progress indication
- */
-function downloadWithProgress(url, filename) {
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erreur de téléchargement');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch(error => {
-            console.error('Erreur de téléchargement :', error);
-            alert('Erreur lors du téléchargement du fichier');
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('drag-over');
         });
-}
+    });
 
-
-/**
- * Smooth scroll to element
- */
-function smoothScrollTo(elementId) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('drag-over');
         });
-    }
+    });
+
+    dropZone.addEventListener('drop', handleDrop);
 }
 
-
 /**
- * Toggle dark mode (future feature)
+ * Handle file drop
  */
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', isDark);
-}
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
 
-
-/**
- * Load user preferences
- */
-function loadUserPreferences() {
-    // Dark mode preference
-    const darkMode = localStorage.getItem('darkMode') === 'true';
-    if (darkMode) {
-        document.body.classList.add('dark-mode');
-    }
-
-    // Notation style preference
-    const notationStyle = localStorage.getItem('notationStyle');
-    if (notationStyle) {
-        const radio = document.querySelector(`input[name="notation_style"][value="${notationStyle}"]`);
-        if (radio) {
-            radio.checked = true;
+    if (files.length > 0) {
+        const fileInput = document.getElementById('file');
+        if (fileInput) {
+            fileInput.files = files;
+            validateFile(files[0]);
         }
     }
 }
 
+/**
+ * Show loading overlay
+ */
+function showLoading(message = 'Traitement en cours...') {
+    // TODO: Implement loading overlay
+    console.log('Loading:', message);
+}
 
 /**
- * Save user preferences
+ * Hide loading overlay
  */
-function saveUserPreferences() {
-    // Save notation style
-    const notationStyle = document.querySelector('input[name="notation_style"]:checked');
-    if (notationStyle) {
-        localStorage.setItem('notationStyle', notationStyle.value);
-    }
-
-    // Save tonality
-    const tonality = document.querySelector('select[name="tonality"]');
-    if (tonality) {
-        localStorage.setItem('tonality', tonality.value);
-    }
+function hideLoading() {
+    // TODO: Implement
+    console.log('Loading finished');
 }
 
-
-// Load preferences on page load
-loadUserPreferences();
-
-// Save preferences when form changes
-document.addEventListener('change', function(e) {
-    if (e.target.name === 'notation_style' || e.target.name === 'tonality') {
-        saveUserPreferences();
-    }
-});
-
-
-// Utility: Format file size
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+/**
+ * Display error message
+ */
+function showError(message) {
+    alert('Erreur: ' + message);
 }
 
-
-// Expose some functions globally for inline onclick handlers
-window.copyTablatureToClipboard = copyTablatureToClipboard;
-window.printTablature = printTablature;
-window.toggleDarkMode = toggleDarkMode;
+/**
+ * Display success message
+ */
+function showSuccess(message) {
+    console.log('Success:', message);
+}

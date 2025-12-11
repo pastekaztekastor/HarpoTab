@@ -3,157 +3,167 @@
 {% block title %}HarpoTab - Accueil{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <!-- Header -->
-        <div class="text-center mb-5">
-            <h1 class="display-4">
-                <i class="bi bi-music-note-beamed text-primary"></i> HarpoTab
-            </h1>
-            <p class="lead text-muted">
-                Convertissez vos partitions en tablatures d'harmonica en quelques clics
-            </p>
-        </div>
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-music-note-beamed"></i> HarpoTab
+        </h1>
+        <p class="lead mb-4">
+            Convertissez vos partitions musicales en tablatures pour harmonica
+        </p>
+        <a href="{{ url_for('convert') }}" class="btn btn-light btn-lg">
+            <i class="bi bi-arrow-repeat"></i> Commencer
+        </a>
+    </div>
+</div>
 
-        <!-- Upload Card -->
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h3 class="card-title mb-4">
-                    <i class="bi bi-cloud-upload"></i> Upload de Partition
-                </h3>
-
-                <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
-                    <!-- File Upload -->
-                    <div class="mb-4">
-                        <label for="file" class="form-label">
-                            Sélectionnez votre partition
-                        </label>
-                        <input type="file" class="form-control form-control-lg" id="file" name="file"
-                               accept=".pdf,.png,.jpg,.jpeg,.musicxml,.mxl,.xml" required>
-                        <div class="form-text">
-                            Formats acceptés : PDF, PNG, JPG, <strong>MusicXML</strong> (.musicxml, .mxl, .xml) - max 10 MB
-                            <br>
-                            <small class="text-success">
-                                <i class="bi bi-robot"></i> <strong>OCR automatique</strong> avec Audiveris pour PDF/Images
-                            </small>
-                        </div>
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-file-earmark-music display-4 text-primary"></i>
                     </div>
-
-                    <!-- Harmonica Type -->
-                    <div class="mb-4">
-                        <label for="harmonica_type" class="form-label">Type d'harmonica</label>
-                        <select class="form-select" id="harmonica_type" name="harmonica_type">
-                            <option value="diatonic" selected>Diatonique 10 trous</option>
-                            <option value="chromatic">Chromatique</option>
-                        </select>
-                    </div>
-
-                    <!-- Tonality -->
-                    <div class="mb-4">
-                        <label for="tonality" class="form-label">Tonalité de l'harmonica</label>
-                        <select class="form-select" id="tonality" name="tonality">
-                            <option value="C" selected>C (Do)</option>
-                            <option value="G">G (Sol)</option>
-                            <option value="A">A (La)</option>
-                            <option value="D">D (Ré)</option>
-                            <option value="E">E (Mi)</option>
-                            <option value="F">F (Fa)</option>
-                            <option value="Bb">Bb (Si bémol)</option>
-                        </select>
-                    </div>
-
-                    <!-- Notation Style -->
-                    <div class="mb-4">
-                        <label class="form-label">Style de notation</label>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="notation_style"
-                                           id="arrows" value="arrows" checked>
-                                    <label class="form-check-label" for="arrows">
-                                        Flèches (4↑ 5↓)
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="notation_style"
-                                           id="letters" value="letters">
-                                    <label class="form-check-label" for="letters">
-                                        Lettres (4B 5D)
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="notation_style"
-                                           id="symbols" value="symbols">
-                                    <label class="form-check-label" for="symbols">
-                                        Symboles (+4 -5)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-arrow-right-circle"></i> Continuer
-                        </button>
-                    </div>
-                </form>
+                    <h5 class="card-title">Lecture de Partitions</h5>
+                    <p class="card-text">
+                        Uploadez vos partitions en PDF ou image. Notre OCR musical extrait automatiquement les notes.
+                    </p>
+                </div>
             </div>
         </div>
 
-        <!-- Info Cards -->
-        <div class="row mt-5 g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-1-circle-fill text-primary fs-1"></i>
-                        <h5 class="card-title mt-3">Upload</h5>
-                        <p class="card-text text-muted">
-                            Importez votre partition PDF ou image
-                        </p>
+        <!-- Feature 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-soundwave display-4 text-primary"></i>
                     </div>
+                    <h5 class="card-title">Extraction de Mélodie</h5>
+                    <p class="card-text">
+                        Isolation automatique de la mélodie principale pour une conversion optimale.
+                    </p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-2-circle-fill text-primary fs-1"></i>
-                        <h5 class="card-title mt-3">Configuration</h5>
-                        <p class="card-text text-muted">
-                            Choisissez votre type d'harmonica et tonalité
-                        </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-arrow-left-right display-4 text-primary"></i>
                     </div>
+                    <h5 class="card-title">Transposition Intelligente</h5>
+                    <p class="card-text">
+                        Transposition automatique pour adapter le morceau à votre harmonica.
+                    </p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-3-circle-fill text-primary fs-1"></i>
-                        <h5 class="card-title mt-3">Téléchargement</h5>
-                        <p class="card-text text-muted">
-                            Obtenez votre tablature en PDF
-                        </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-grid-3x2 display-4 text-primary"></i>
                     </div>
+                    <h5 class="card-title">Tablature Détaillée</h5>
+                    <p class="card-text">
+                        Tablature précise avec numéros de trous, sens du souffle et techniques (bends).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-file-pdf display-4 text-primary"></i>
+                    </div>
+                    <h5 class="card-title">PDF Professionnel</h5>
+                    <p class="card-text">
+                        Génération de PDF avec partition + tablature + accords via Lilypond.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-sliders display-4 text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Multiple Harmonicas</h5>
+                    <p class="card-text">
+                        Support des harmonicas diatoniques et chromatiques dans différentes tonalités.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    // Preview du fichier sélectionné
-    document.getElementById('file').addEventListener('change', function(e) {
-        const fileName = e.target.files[0]?.name;
-        if (fileName) {
-            console.log('Fichier sélectionné:', fileName);
-        }
-    });
-</script>
+<!-- How it Works -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Comment ça marche ?</h2>
+        <div class="row">
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">1</span>
+                </div>
+                <h5>Uploadez</h5>
+                <p class="text-muted">Importez votre partition (PDF ou image)</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">2</span>
+                </div>
+                <h5>Configurez</h5>
+                <p class="text-muted">Choisissez votre type d'harmonica</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">3</span>
+                </div>
+                <h5>Convertissez</h5>
+                <p class="text-muted">Laissez HarpoTab faire le travail</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <span class="fs-4 fw-bold">4</span>
+                </div>
+                <h5>Téléchargez</h5>
+                <p class="text-muted">Récupérez votre tablature en PDF</p>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('convert') }}" class="btn btn-primary btn-lg">
+                Essayer maintenant
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Phase 2 Teaser -->
+<div class="container my-5">
+    <div class="alert alert-info">
+        <h5><i class="bi bi-lightbulb"></i> Bientôt disponible - Phase 2</h5>
+        <ul class="mb-0">
+            <li>Extraction de mélodie depuis fichiers MP3</li>
+            <li>Conversion depuis liens YouTube</li>
+            <li>Analyse audio avancée</li>
+        </ul>
+    </div>
+</div>
 {% endblock %}

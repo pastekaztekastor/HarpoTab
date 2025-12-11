@@ -1,312 +1,249 @@
-# HarpoTab - Convertisseur Partition → Tablature Harmonica
+# HarpoTab
 
-Application web Flask pour convertir des partitions musicales en tablatures d'harmonica diatonique.
+Convertisseur automatique de partitions musicales en tablatures pour harmonica.
+
+## Description
+
+HarpoTab est un outil qui permet de convertir des partitions de piano (ou autres instruments) en tablatures adaptées pour harmonica diatonique ou chromatique. L'application extrait automatiquement la mélodie principale, effectue une transposition intelligente si nécessaire, et génère un PDF professionnel avec la partition et la tablature synchronisées.
 
 ## Fonctionnalités
 
-### Format Pédagogique Innovant
-- **Tablature à 2 lignes** : Format visuel clair avec ligne soufflée (↑) et ligne aspirée (↓)
-- **Notation musicale** : Affiche la durée des notes (ronde, blanche, noire, croche)
-- **Numéros de trou** : Indiqués directement sur les notes pour faciliter l'apprentissage
-- **Partition originale incluse** : Affichée au-dessus de la tablature dans le PDF
+### Phase 1 (En développement)
+- 📄 **Lecture de partitions** : Support PDF et images (JPEG, PNG)
+- 🎵 **OCR musical** : Extraction automatique via Audiveris
+- 🎼 **Isolation de mélodie** : Extraction de la ligne mélodique principale
+- 🔄 **Transposition automatique** : Adaptation intelligente à votre harmonica
+- 🎹 **Support multi-harmonica** : Diatoniques (C, D, G, etc.) et chromatiques
+- 📝 **Tablature détaillée** : Numéros de trous, sens du souffle, techniques (bends)
+- 🎨 **Génération PDF** : Partition + tablature via Lilypond
+- 🌐 **Interface web** : Application Flask avec Bootstrap 5
 
-### Autres fonctionnalités
-- Upload de partitions PDF ou images (PNG, JPG)
-- Support de l'harmonica diatonique 10 trous
-- Multiples tonalités : C, G, A, D, E, F, Bb
-- 3 styles de notation :
-  - Flèches : `4↑ 5↓`
-  - Lettres : `4B 5D`
-  - Symboles : `+4 -5`
-- Génération de PDF professionnel de la tablature
-- Interface responsive avec Bootstrap 5
-- Visualisation web interactive avant téléchargement
+### Phase 2 (À venir)
+- 🎧 Extraction depuis fichiers audio (MP3)
+- 📹 Conversion depuis liens YouTube
+- 🎤 Analyse spectrale avancée
+
+## Architecture
+
+```
+HarpoTab/
+├── app.py                      # Application Flask principale
+├── config.py                   # Configuration
+├── requirements.txt            # Dépendances Python
+├── CAHIER_DES_CHARGES.md       # Spécifications complètes
+│
+├── modules/                    # Modules de traitement
+│   ├── ocr_reader.py           # OCR musical (Audiveris)
+│   ├── melody_extractor.py     # Extraction mélodie
+│   ├── music_analyzer.py       # Analyse musicale
+│   ├── transposer.py           # Transposition
+│   ├── harmonica_mapper.py     # Mapping notes → tablature
+│   └── lilypond_generator.py   # Génération PDF
+│
+├── data/
+│   └── harmonica_maps/         # Mappings par type/tonalité
+│
+├── static/                     # Assets web
+│   ├── css/
+│   ├── js/
+│   └── uploads/
+│
+└── templates/                  # Templates HTML
+```
 
 ## Installation
 
 ### Prérequis
 
-- Python 3.8 ou supérieur
-- pip (gestionnaire de paquets Python)
+- **Python 3.9+**
+- **Audiveris** : OCR musical
+- **Lilypond** : Génération de partitions
+- **Poppler** : Pour pdf2image
 
-### Étapes d'installation
+### Installation rapide
 
-1. Cloner ou télécharger le projet
-
-2. Installer les dépendances :
 ```bash
+# Cloner le dépôt
+git clone https://github.com/mathurinc/harpotab.git
+cd harpotab
+
+# Lancer le script d'installation
+chmod +x setup.sh
+./setup.sh
+```
+
+### Installation manuelle
+
+#### 1. Dépendances système (Arch Linux / Manjaro)
+
+```bash
+# Audiveris
+yay -S audiveris
+
+# Lilypond
+sudo pacman -S lilypond
+
+# Poppler (pdf2image)
+sudo pacman -S poppler
+
+# Tesseract (optionnel)
+sudo pacman -S tesseract tesseract-data-fra
+```
+
+#### 2. Environnement Python
+
+```bash
+# Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate
+
+# Installer les dépendances
 pip install -r requirements.txt
-```
-
-3. Lancer l'application :
-```bash
-python app.py
-```
-
-4. Ouvrir votre navigateur à l'adresse :
-```
-http://localhost:5000
 ```
 
 ## Utilisation
 
-1. **Upload** : Sélectionnez votre partition (PDF ou image)
-2. **Configuration** :
-   - Choisissez le type d'harmonica (Diatonique 10 trous)
-   - Sélectionnez la tonalité (C, G, A, D, E, F, Bb)
-   - Choisissez le style de notation (flèches, lettres, symboles)
-3. **Conversion** : Cliquez sur "Continuer" puis "Lancer la conversion"
-4. **Téléchargement** : Récupérez votre tablature en PDF
-
-## Structure du Projet
-
-```
-HarpoTab/
-├── app.py                      # Application Flask principale
-├── requirements.txt            # Dépendances Python
-├── README.md                   # Documentation
-│
-├── data/
-│   └── harmonica_maps.json    # Mappings notes → tablature
-│
-├── modules/
-│   ├── pdf_reader.py          # Extraction données musicales
-│   ├── music_parser.py        # Parsing des notes
-│   ├── harmonica.py           # Conversion en tablature
-│   └── pdf_generator.py       # Génération PDF
-│
-├── static/
-│   ├── css/
-│   │   └── style.css          # Styles personnalisés
-│   ├── js/
-│   │   └── main.js            # Scripts JavaScript
-│   └── uploads/               # Fichiers uploadés (créé automatiquement)
-│
-└── templates/
-    ├── base.html              # Template de base
-    ├── index.html             # Page d'accueil
-    ├── convert.html           # Page de conversion
-    └── result.html            # Page de résultat
-```
-
-## Technologies Utilisées
-
-### Backend
-- **Flask 3.0** : Framework web Python
-- **music21 9.1** : Analyse musicale
-- **ReportLab 4.0** : Génération de PDF
-- **PyPDF2 3.0** : Lecture de PDF
-- **Pillow 10.1** : Traitement d'images
-- **OpenCV 4.8** : Analyse d'images
-
-### Frontend
-- **Bootstrap 5.3** : Framework CSS
-- **Bootstrap Icons** : Icônes
-- **JavaScript ES6** : Interactions client
-
-## OCR Musical - Reconnaissance Automatique ✨
-
-**HarpoTab intègre maintenant un VRAI OCR musical avec Audiveris !**
-
-### Méthodes de reconnaissance (par ordre de priorité)
-
-1. **MusicXML direct** (.musicxml, .mxl, .xml)
-   - ✅ Import parfait depuis MuseScore, Finale, Sibelius
-   - ✅ Zéro perte de données
-   - ✅ Métadonnées complètes (titre, compositeur, tempo)
-
-2. **Audiveris OCR** (PDF et images) - **NOUVEAU !**
-   - ✅ Reconnaissance optique RÉELLE des partitions
-   - ✅ Standard open-source professionnel
-   - ✅ Export MusicXML automatique
-   - ✅ Haute précision
-   - ⚙️ Installation : `./install_audiveris.sh`
-
-3. **Données de démonstration** (fallback)
-   - Utilisé si Audiveris n'est pas installé
-   - Permet de tester l'application
-
-### Installation d'Audiveris
+### Lancer l'application
 
 ```bash
-# Installation automatique
-./install_audiveris.sh
+# Activer l'environnement virtuel
+source venv/bin/activate
 
-# Ou manuellement selon votre système :
-# Manjaro/Arch
-yay -S audiveris
-
-# Ubuntu/Debian
-sudo apt-get install audiveris
-
-# macOS
-brew install audiveris
+# Lancer Flask
+python app.py
 ```
 
-### Test de l'OCR
+L'application sera accessible sur `http://localhost:5000`
 
-```bash
-python test_audiveris_ocr.py
-```
+### Workflow
 
-## Format de Tablature Pédagogique
-
-### Portée à 2 Lignes
-
-HarpoTab utilise un **format innovant à 2 lignes** conçu pour l'apprentissage :
-
-```
-Partition originale (en haut du PDF)
-↓
-
-  ↑ SOUFFLÉ    ○   ○       ○
-             1   2       4
-  ─────────────────────────────────  (Ligne supérieure)
-
-  ↓ ASPIRÉ         ○   ○       ○
-                 1   2       4
-  ─────────────────────────────────  (Ligne inférieure)
-```
-
-### Avantages Pédagogiques
-
-1. **Clarté visuelle** : Séparation immédiate entre notes soufflées et aspirées
-2. **Apprentissage facilité** : Les numéros de trou sont directement sur les notes
-3. **Notation musicale** : Les formes de notes indiquent la durée (ronde, blanche, noire, croche)
-4. **Partition intégrée** : La partition originale est au-dessus pour apprendre en comparant
-5. **Organisation par mesures** : Même structure que la partition traditionnelle
-
-### Comment Lire la Tablature
-
-- **Ligne du HAUT** = Notes à **SOUFFLER** (↑)
-- **Ligne du BAS** = Notes à **ASPIRER** (↓)
-- **Chiffres** = Numéro du trou (1 à 10)
-- **Forme des notes** :
-  - ○ vide = Ronde ou Blanche (notes longues)
-  - ● pleine = Noire ou Croche (notes courtes)
-  - ♪ avec crochet = Croche ou Double-croche
-
-### Exemple : Gamme de Do
-
-```
-Mesure 1:
-  ↑ SOUFFLÉ    1       2
-  ↓ ASPIRÉ         1       2
-
-Mesure 2:
-  ↑ SOUFFLÉ    4       5
-  ↓ ASPIRÉ         4       5
-
-Mesure 3:
-  ↑ SOUFFLÉ    6       7
-  ↓ ASPIRÉ         6       7
-```
-
-Traduction : Trou 1 soufflé (Do), trou 1 aspiré (Ré), trou 2 soufflé (Mi), etc.
-
-## Exemples de Mapping
-
-### Harmonica Diatonique en C
-
-| Trou | Soufflé (↑) | Aspiré (↓) |
-|------|-------------|------------|
-| 1    | C4          | D4         |
-| 2    | E4          | G4         |
-| 3    | G3          | B4         |
-| 4    | C5          | D5         |
-| 5    | E5          | F5         |
-| 6    | G5          | A5         |
-| 7    | C6          | B5         |
-| 8    | E6          | D6         |
-| 9    | G6          | F6         |
-| 10   | C7          | A6         |
-
-## Styles de Notation
-
-### Flèches (arrows)
-- `4↑` : Souffler dans le trou 4
-- `5↓` : Aspirer dans le trou 5
-
-### Lettres (letters)
-- `4B` : Blow (souffler) dans le trou 4
-- `5D` : Draw (aspirer) dans le trou 5
-
-### Symboles (symbols)
-- `+4` : Souffler dans le trou 4
-- `-5` : Aspirer dans le trou 5
+1. **Accédez à l'interface web**
+2. **Uploadez votre partition** (PDF ou image)
+3. **Sélectionnez votre harmonica** (type et tonalité)
+4. **Cliquez sur "Convertir"**
+5. **Téléchargez le PDF** généré avec partition + tablature
 
 ## Configuration
 
-### Modifier la clé secrète Flask
-Dans `app.py`, ligne 13 :
-```python
-app.config['SECRET_KEY'] = 'votre-cle-secrete-ici-changez-moi'
-```
+La configuration se trouve dans `config.py`. Vous pouvez personnaliser :
 
-### Modifier la taille maximale des fichiers
-Dans `app.py`, ligne 15 :
-```python
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB
-```
+- Chemins vers Audiveris et Lilypond
+- Taille maximale des uploads
+- Options de transposition
+- Format des PDF générés
 
-## Développement Futur
+Variables d'environnement :
 
-### Phase 2 - Améliorations prévues
-- [ ] OCR musical réel (Audiveris)
-- [ ] Support harmonica chromatique
-- [ ] Édition manuelle de la tablature
-- [ ] Support MusicXML
-- [ ] Export en formats multiples (MIDI, ABC, etc.)
-- [ ] Playback audio
-- [ ] Annotations et métronome
-- [ ] Partage de tablatures
-
-## Dépannage
-
-### Erreur : Module non trouvé
 ```bash
-pip install -r requirements.txt
+export AUDIVERIS_PATH=/path/to/audiveris
+export LILYPOND_PATH=/path/to/lilypond
+export FLASK_DEBUG=true
+export SECRET_KEY=your-secret-key
 ```
 
-### Port 5000 déjà utilisé
-Modifier dans `app.py`, dernière ligne :
-```python
-app.run(debug=True, host='0.0.0.0', port=8080)
-```
+## Développement
 
-### Erreur lors de l'upload
-Vérifier que le dossier `static/uploads` existe et a les bonnes permissions :
+### Structure des modules
+
+Chaque module a une responsabilité unique :
+
+- **ocr_reader** : Interface avec Audiveris
+- **melody_extractor** : Isolation de la mélodie
+- **music_analyzer** : Détection tonalité, accords, tessiture
+- **transposer** : Algorithmes de transposition
+- **harmonica_mapper** : Conversion notes → tablature
+- **lilypond_generator** : Création des fichiers Lilypond
+
+### Tests
+
 ```bash
-mkdir -p static/uploads
-chmod 755 static/uploads
+# Lancer les tests
+pytest tests/
+
+# Tests spécifiques
+pytest tests/test_ocr.py
+pytest tests/test_transposition.py
 ```
 
-## Contribution
+### Ajouter un nouveau type d'harmonica
 
-Les contributions sont les bienvenues ! Pour contribuer :
+1. Créer le fichier de mapping JSON dans `data/harmonica_maps/`
+2. Ajouter le type dans `config.py` → `HARMONICA_TYPES`
+3. Mettre à jour le mapping dans `harmonica_mapper.py`
+
+Exemple de mapping :
+
+```json
+{
+  "type": "diatonic",
+  "key": "D",
+  "notes": {
+    "1": {
+      "blow": {"note": "D", "octave": 4},
+      "draw": {"note": "E", "octave": 4}
+    }
+  }
+}
+```
+
+## Dépendances
+
+### Python
+
+- **flask** : Framework web
+- **pillow** : Traitement d'images
+- **pdf2image** : Conversion PDF
+- **opencv-python** : Prétraitement images (optionnel)
+
+### Systèmes
+
+- **Audiveris** : OCR musical
+- **Lilypond** : Génération partitions
+- **Poppler** : Utilitaires PDF
+
+## Roadmap
+
+- [x] Cahier des charges
+- [x] Structure du projet
+- [x] Interface web de base
+- [ ] **Intégration Audiveris**
+- [ ] Extraction de mélodie
+- [ ] Algorithme de transposition
+- [ ] Génération Lilypond
+- [ ] Tests unitaires
+- [ ] Documentation complète
+- [ ] Phase 2 : Audio/YouTube
+
+## Contribuer
+
+Les contributions sont les bienvenues !
 
 1. Fork le projet
 2. Créez une branche (`git checkout -b feature/amelioration`)
-3. Committez vos changements (`git commit -m 'Ajout fonctionnalité'`)
-4. Push sur la branche (`git push origin feature/amelioration`)
+3. Commitez (`git commit -m 'Ajout fonctionnalité'`)
+4. Pushez (`git push origin feature/amelioration`)
 5. Ouvrez une Pull Request
 
 ## Licence
 
-Ce projet est open-source et disponible sous licence MIT.
+MIT License - Voir [LICENSE](LICENSE)
 
 ## Auteur
 
-Créé avec Flask et Bootstrap
-
-## Support
-
-Pour toute question ou problème :
-- Ouvrir une issue sur GitHub
-- Consulter la documentation Flask : https://flask.palletsprojects.com/
+**Mathurin C.** - [GitHub](https://github.com/mathurinc)
 
 ## Remerciements
 
-- Bootstrap pour le framework CSS
-- ReportLab pour la génération de PDF
-- La communauté Python pour les excellentes bibliothèques
+- [Audiveris](https://github.com/Audiveris/audiveris) : OCR musical open-source
+- [Lilypond](https://lilypond.org/) : Gravure musicale professionnelle
+- [Flask](https://flask.palletsprojects.com/) : Framework web Python
+- Communauté des harmonicistes
+
+## Support
+
+Pour signaler un bug ou demander une fonctionnalité, ouvrez une [issue sur GitHub](https://github.com/mathurinc/harpotab/issues).
+
+---
+
+**Version actuelle** : 0.1.0 (Alpha)
+**Statut** : En développement actif

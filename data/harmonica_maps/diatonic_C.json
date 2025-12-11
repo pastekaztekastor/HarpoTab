@@ -1,0 +1,85 @@
+{
+  "type": "diatonic",
+  "key": "C",
+  "description": "Harmonica diatonique Richter 10 trous en C",
+  "holes": 10,
+  "tuning": "richter",
+  "notes": {
+    "1": {
+      "blow": {"note": "C", "octave": 4},
+      "draw": {"note": "D", "octave": 4},
+      "draw_bend_half": {"note": "Db", "octave": 4}
+    },
+    "2": {
+      "blow": {"note": "E", "octave": 4},
+      "draw": {"note": "G", "octave": 4},
+      "draw_bend_half": {"note": "Gb", "octave": 4},
+      "draw_bend_full": {"note": "F", "octave": 4},
+      "blow_bend_half": {"note": "Eb", "octave": 4}
+    },
+    "3": {
+      "blow": {"note": "G", "octave": 4},
+      "draw": {"note": "B", "octave": 4},
+      "draw_bend_half": {"note": "Bb", "octave": 4},
+      "draw_bend_full": {"note": "A", "octave": 4},
+      "draw_bend_full_half": {"note": "Ab", "octave": 4}
+    },
+    "4": {
+      "blow": {"note": "C", "octave": 5},
+      "draw": {"note": "D", "octave": 5},
+      "draw_bend_half": {"note": "Db", "octave": 5},
+      "blow_bend_half": {"note": "B", "octave": 4}
+    },
+    "5": {
+      "blow": {"note": "E", "octave": 5},
+      "draw": {"note": "F", "octave": 5},
+      "draw_bend_half": {"note": "E", "octave": 5},
+      "blow_bend_half": {"note": "Eb", "octave": 5}
+    },
+    "6": {
+      "blow": {"note": "G", "octave": 5},
+      "draw": {"note": "A", "octave": 5},
+      "draw_bend_half": {"note": "Ab", "octave": 5},
+      "blow_bend_half": {"note": "Gb", "octave": 5},
+      "blow_overblow": {"note": "Bb", "octave": 5}
+    },
+    "7": {
+      "blow": {"note": "C", "octave": 6},
+      "draw": {"note": "B", "octave": 5},
+      "draw_bend_half": {"note": "Bb", "octave": 5},
+      "blow_overblow": {"note": "Db", "octave": 6}
+    },
+    "8": {
+      "blow": {"note": "E", "octave": 6},
+      "draw": {"note": "D", "octave": 6},
+      "draw_bend_half": {"note": "Db", "octave": 6},
+      "blow_bend_half": {"note": "Eb", "octave": 6}
+    },
+    "9": {
+      "blow": {"note": "G", "octave": 6},
+      "draw": {"note": "F", "octave": 6},
+      "draw_bend_half": {"note": "E", "octave": 6},
+      "blow_bend_half": {"note": "Gb", "octave": 6},
+      "blow_overblow": {"note": "Ab", "octave": 6}
+    },
+    "10": {
+      "blow": {"note": "C", "octave": 7},
+      "draw": {"note": "A", "octave": 6},
+      "draw_bend_half": {"note": "Ab", "octave": 6},
+      "blow_bend_half": {"note": "B", "octave": 6},
+      "blow_overblow": {"note": "D", "octave": 7}
+    }
+  },
+  "range": {
+    "min": {"note": "C", "octave": 4},
+    "max": {"note": "C", "octave": 7}
+  },
+  "techniques": {
+    "blow": "Souffler",
+    "draw": "Aspirer",
+    "blow_bend": "Bend soufflé",
+    "draw_bend": "Bend aspiré",
+    "overblow": "Overblow",
+    "overdraw": "Overdraw"
+  }
+}
