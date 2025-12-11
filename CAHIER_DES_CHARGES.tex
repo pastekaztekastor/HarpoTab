@@ -336,6 +336,45 @@ numpy>=1.24.0
 scipy>=1.10.0
 \end{lstlisting}
 
+\subsubsection{Déploiement avec Docker}
+
+Pour faciliter le déploiement et garantir la reproductibilité de l'environnement, HarpoTab utilisera Docker pour l'environnement de production.
+
+\textbf{Avantages de Docker :}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Isolation complète} : Toutes les dépendances (Python, Audiveris, Lilypond) dans un conteneur
+    \item \textbf{Reproductibilité} : Même environnement en développement et production
+    \item \textbf{Facilité de déploiement} : Une seule commande pour lancer l'application
+    \item \textbf{Portabilité} : Fonctionne sur n'importe quel système supportant Docker
+\end{itemize}
+
+\textbf{Architecture Docker :}
+
+\begin{lstlisting}[caption=Structure Docker]
+HarpoTab/
+├── Dockerfile              # Image principale
+├── docker-compose.yml      # Orchestration
+└── .dockerignore           # Fichiers à ignorer
+\end{lstlisting}
+
+\textbf{Utilisation :}
+
+\begin{lstlisting}[language=bash, caption=Commandes Docker]
+# Build de l'image
+docker build -t harpotab:latest .
+
+# Lancement du conteneur
+docker run -p 5000:5000 harpotab:latest
+
+# Ou avec docker-compose
+docker-compose up
+\end{lstlisting}
+
+\begin{infobox}{Note sur le développement}
+Pour le développement local, l'utilisation d'un environnement virtuel Python (venv) reste recommandée pour plus de simplicité et de rapidité. Docker sera utilisé principalement pour la production et la distribution.
+\end{infobox}
+
 \subsection{Structure du Projet}
 
 \begin{lstlisting}[caption=Arborescence du projet]
@@ -585,6 +624,7 @@ Messages clairs pour :
 \textbf{Évolutions}
 
 \begin{itemize}[leftmargin=*]
+    \item[$\square$] Containerisation Docker complète
     \item[$\square$] Support harmonica chromatique
     \item[$\square$] Détection automatique du tempo
     \item[$\square$] Export MIDI
