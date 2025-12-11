@@ -1,0 +1,707 @@
+% HarpoTab - Cahier des Charges
+% Author: Mathurin C.
+% Date: 11 décembre 2025
+
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+% \usepackage{fontawesome5} % Package non installé
+
+% Geometry
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm,
+    headheight=15pt
+}
+
+% Colors
+\definecolor{primarycolor}{RGB}{13,110,253}
+\definecolor{secondarycolor}{RGB}{108,117,125}
+\definecolor{codebackground}{RGB}{248,249,250}
+\definecolor{commentcolor}{RGB}{108,117,125}
+\definecolor{stringcolor}{RGB}{220,53,69}
+\definecolor{keywordcolor}{RGB}{13,110,253}
+
+% Hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primarycolor,
+    filecolor=primarycolor,
+    urlcolor=primarycolor,
+    citecolor=primarycolor,
+    bookmarks=true,
+    bookmarksnumbered=true,
+    pdftitle={HarpoTab - Cahier des Charges},
+    pdfauthor={Mathurin C.},
+    pdfsubject={Cahier des charges technique},
+    pdfkeywords={harmonica, tablature, partition, OCR musical}
+}
+
+% Headers and Footers
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\textbf{HarpoTab}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Section formatting
+\titleformat{\section}
+    {\normalfont\LARGE\bfseries\color{primarycolor}}
+    {\thesection}{1em}{}
+\titleformat{\subsection}
+    {\normalfont\Large\bfseries\color{primarycolor}}
+    {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+    {\normalfont\large\bfseries\color{secondarycolor}}
+    {\thesubsubsection}{1em}{}
+
+% Code listings
+\lstset{
+    backgroundcolor=\color{codebackground},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{commentcolor},
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{secondarycolor},
+    numbers=left,
+    numberstyle=\tiny\color{secondarycolor},
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+% Custom boxes
+\newtcolorbox{infobox}[1]{
+    colback=blue!5!white,
+    colframe=primarycolor,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+\newtcolorbox{warningbox}[1]{
+    colback=orange!5!white,
+    colframe=orange,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+\newtcolorbox{successbox}[1]{
+    colback=green!5!white,
+    colframe=green!60!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% Document
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+
+    \vspace*{2cm}
+
+    {\Huge\bfseries\color{primarycolor} HarpoTab\par}
+    \vspace{1cm}
+    {\LARGE Cahier des Charges\par}
+    \vspace{1.5cm}
+    {\Large Convertisseur de Partitions Musicales\par}
+    {\Large vers Tablatures pour Harmonica\par}
+
+    \vspace{3cm}
+
+    \begin{tikzpicture}
+        \draw[primarycolor, line width=2pt] (0,0) -- (10,0);
+    \end{tikzpicture}
+
+    \vspace{3cm}
+
+    {\large
+    \textbf{Auteur:} Mathurin C.\par
+    \textbf{Date:} 11 décembre 2025\par
+    \textbf{Version:} 1.0\par
+    \textbf{Statut:} Spécifications Phase 1\par
+    }
+
+    \vfill
+
+    {\large GitHub: \url{https://github.com/mathurinc/harpotab}\par}
+
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Main content
+\section{Présentation du Projet}
+
+\subsection{Objectif}
+
+HarpoTab est un outil de conversion automatique de partitions musicales et fichiers audio en tablatures pour harmonica. Le système extrait la mélodie principale et génère une tablature adaptée au type d'harmonica sélectionné, avec transposition automatique si nécessaire.
+
+\subsection{Portée}
+
+Le projet est divisé en deux phases de développement :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Phase 1} : Conversion de partitions (PDF, JPEG) vers tablature harmonica
+    \item \textbf{Phase 2} : Extraction de mélodie depuis fichiers audio (MP3) et vidéos YouTube
+\end{itemize}
+
+\section{Spécifications Fonctionnelles}
+
+\subsection{Entrées Supportées}
+
+\subsubsection{Phase 1 (Prioritaire)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{PDF} : Partitions musicales au format PDF
+    \item \textbf{JPEG/PNG} : Images de partitions scannées ou photographiées
+\end{itemize}
+
+\subsubsection{Phase 2 (Développement ultérieur)}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MP3} : Fichiers audio (extraction de mélodie)
+    \item \textbf{YouTube} : Liens vers vidéos (extraction audio puis mélodie)
+\end{itemize}
+
+\subsection{Types d'Harmonica Supportés}
+
+L'utilisateur doit pouvoir sélectionner parmi les types suivants :
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Harmonica diatonique} (Richter 10 trous)
+    \begin{itemize}
+        \item Tonalités : C, D, E, F, G, A, B$\flat$, B
+    \end{itemize}
+    \item \textbf{Harmonica chromatique} (12/16 trous)
+    \item \textbf{Autres types} (selon évolution du projet)
+\end{itemize}
+
+\subsection{Sortie Générée}
+
+Un \textbf{PDF} généré via Lilypond contenant :
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Portée musicale} : Mélodie en notation classique
+    \item \textbf{Tablature harmonica} : Positionnée sous la portée, indiquant :
+    \begin{itemize}
+        \item Numéro de trou
+        \item Sens du souffle (aspiration/expiration)
+        \item Techniques (bend, overblow, etc.)
+    \end{itemize}
+    \item \textbf{Accords} : Grille d'accords au-dessus de la portée
+    \item \textbf{Transposition} : Information sur la transposition appliquée (si nécessaire)
+    \item \textbf{Métadonnées} :
+    \begin{itemize}
+        \item Titre du morceau
+        \item Tonalité originale et finale
+        \item Type d'harmonica utilisé
+        \item Tempo
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Traitement de la Mélodie}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Extraction} : Isolation de la mélodie principale depuis :
+    \begin{itemize}
+        \item Partitions piano (généralement main droite)
+        \item Partitions multi-instruments
+        \item Fichiers audio (Phase 2)
+    \end{itemize}
+    \item \textbf{Simplification} : Réduction à une ligne mélodique monophonique
+    \item \textbf{Adaptation} : Ajustement de la tessiture pour l'harmonica
+\end{itemize}
+
+\subsection{Transposition Automatique}
+
+Le système doit :
+
+\begin{enumerate}[leftmargin=*]
+    \item Analyser la mélodie extraite
+    \item Vérifier la jouabilité sur l'harmonica sélectionné
+    \item Proposer une transposition optimale si nécessaire
+    \item Indiquer clairement la transposition appliquée sur le PDF final
+\end{enumerate}
+
+\newpage
+
+\section{Spécifications Techniques}
+
+\subsection{Architecture}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, draw, fill=blue!10, text width=8cm, text centered, minimum height=1cm, rounded corners},
+    arrow/.style={->, >=stealth, thick}
+]
+    \node[box] (interface) at (0,0) {Interface Web (Flask + Bootstrap)};
+    \node[box] (analyse) at (0,-1.5) {Module d'Analyse d'Entrée};
+    \node[box] (extraction) at (0,-3) {Module d'Extraction (OCR Musical)};
+    \node[box] (traitement) at (0,-4.5) {Module de Traitement Musical};
+    \node[box] (transposition) at (0,-6) {Module de Transposition};
+    \node[box] (tablature) at (0,-7.5) {Module de Génération Tablature};
+    \node[box] (lilypond) at (0,-9) {Générateur Lilypond};
+    \node[box] (pdf) at (0,-10.5) {PDF Final};
+
+    \draw[arrow] (interface) -- (analyse);
+    \draw[arrow] (analyse) -- (extraction);
+    \draw[arrow] (extraction) -- (traitement);
+    \draw[arrow] (traitement) -- (transposition);
+    \draw[arrow] (transposition) -- (tablature);
+    \draw[arrow] (tablature) -- (lilypond);
+    \draw[arrow] (lilypond) -- (pdf);
+\end{tikzpicture}
+\caption{Architecture du système HarpoTab}
+\end{figure}
+
+\subsection{Technologies et Dépendances}
+
+\subsubsection{Phase 1 : Partitions (PDF/JPEG)}
+
+\textbf{Dépendances obligatoires :}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Audiveris} : OCR musical pour lecture de partitions
+    \item \textbf{Lilypond} : Génération de partitions et tablatures
+    \item \textbf{Python 3.9+} : Langage principal
+    \item \textbf{Flask} : Framework web
+    \item \textbf{Bootstrap 5} : Interface utilisateur responsive
+\end{itemize}
+
+\textbf{Bibliothèques Python :}
+
+\begin{lstlisting}[language=bash, caption=requirements.txt]
+flask>=3.0.0
+pillow>=10.0.0
+pdf2image>=1.16.0
+opencv-python>=4.8.0
+python-dotenv>=1.0.0
+pytest>=7.4.0
+\end{lstlisting}
+
+\textbf{Dépendances optionnelles :}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{OpenCV} : Prétraitement d'images
+    \item \textbf{Tesseract} : OCR texte pour métadonnées
+\end{itemize}
+
+\subsubsection{Phase 2 : Audio (MP3/YouTube)}
+
+\textbf{Dépendances supplémentaires :}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{yt-dlp} : Extraction vidéos YouTube
+    \item \textbf{librosa} ou \textbf{essentia} : Analyse audio, extraction mélodie
+    \item \textbf{aubio} : Détection de hauteur (pitch detection)
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption=Dépendances Phase 2]
+librosa>=0.10.0
+yt-dlp>=2023.0.0
+pydub>=0.25.0
+numpy>=1.24.0
+scipy>=1.10.0
+\end{lstlisting}
+
+\subsection{Structure du Projet}
+
+\begin{lstlisting}[caption=Arborescence du projet]
+HarpoTab/
+├── app.py                      # Application Flask principale
+├── config.py                   # Configuration
+├── requirements.txt            # Dépendances Python
+├── setup.sh                    # Script d'installation
+├── CAHIER_DES_CHARGES.md       # Ce document
+│
+├── modules/
+│   ├── ocr_reader.py           # Lecture partitions
+│   ├── melody_extractor.py     # Isolation mélodie
+│   ├── music_analyzer.py       # Analyse musicale
+│   ├── transposer.py           # Transposition
+│   ├── harmonica_mapper.py     # Mapping tablature
+│   └── lilypond_generator.py   # Génération PDF
+│
+├── data/
+│   ├── harmonica_maps/
+│   │   ├── diatonic_C.json     # Mapping C
+│   │   └── diatonic_G.json     # Mapping G
+│   └── templates/
+│       └── lilypond_template.ly
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── uploads/
+│
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── upload.html
+│   └── result.html
+│
+└── tests/
+    ├── test_ocr.py
+    ├── test_transposition.py
+    └── test_lilypond_generation.py
+\end{lstlisting}
+
+\newpage
+
+\section{Interface Utilisateur}
+
+\subsection{Technologies}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Framework} : Flask
+    \item \textbf{CSS} : Bootstrap 5
+    \item \textbf{Design} : Responsive, mobile-first
+\end{itemize}
+
+\subsection{Pages Principales}
+
+\subsubsection{Page d'Accueil}
+
+\begin{itemize}[leftmargin=*]
+    \item Présentation du projet
+    \item Fonctionnalités principales
+    \item Bouton "Commencer"
+\end{itemize}
+
+\subsubsection{Page de Conversion}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Section Upload} :
+    \begin{itemize}
+        \item Glisser-déposer ou sélection fichier
+        \item Formats acceptés : PDF, JPEG, PNG
+    \end{itemize}
+
+    \item \textbf{Section Configuration} :
+    \begin{itemize}
+        \item Sélecteur type d'harmonica
+        \item Sélecteur tonalité
+        \item Options avancées (facultatif)
+    \end{itemize}
+
+    \item \textbf{Bouton Conversion}
+\end{enumerate}
+
+\subsubsection{Page Résultat}
+
+\begin{itemize}[leftmargin=*]
+    \item Aperçu du PDF généré
+    \item Informations de transposition
+    \item Bouton téléchargement PDF
+    \item Bouton "Nouvelle conversion"
+\end{itemize}
+
+\subsection{Gestion des Erreurs}
+
+Messages clairs pour :
+
+\begin{itemize}[leftmargin=*]
+    \item Format de fichier non supporté
+    \item Partition illisible (mauvaise qualité OCR)
+    \item Mélodie non extractible
+    \item Morceau injouable sur l'harmonica sélectionné
+\end{itemize}
+
+\section{Workflow Utilisateur}
+
+\subsection{Phase 1 : Partitions}
+
+\begin{enumerate}[leftmargin=*]
+    \item L'utilisateur accède à l'interface web
+    \item Upload d'un fichier PDF ou JPEG
+    \item Sélection du type d'harmonica (ex: Diatonique C)
+    \item Clic sur "Convertir"
+    \item Traitement backend :
+    \begin{enumerate}
+        \item OCR musical (Audiveris)
+        \item Extraction de la mélodie
+        \item Détection des accords
+        \item Analyse de jouabilité
+        \item Transposition si nécessaire
+        \item Génération tablature
+        \item Compilation Lilypond → PDF
+    \end{enumerate}
+    \item Affichage du résultat
+    \item Téléchargement du PDF
+\end{enumerate}
+
+\subsection{Phase 2 : Audio/YouTube}
+
+\begin{enumerate}[leftmargin=*]
+    \item Upload MP3 ou lien YouTube
+    \item Extraction audio (si YouTube)
+    \item Analyse spectrale
+    \item Extraction mélodie principale
+    \item Transcription en notes
+    \item Suite identique à Phase 1 (étapes 5-7)
+\end{enumerate}
+
+\newpage
+
+\section{Contraintes et Exigences}
+
+\subsection{Performance}
+
+\begin{itemize}[leftmargin=*]
+    \item Temps de traitement < 30 secondes pour une partition simple (2-3 pages)
+    \item Temps de traitement < 2 minutes pour extraction audio (Phase 2)
+\end{itemize}
+
+\subsection{Qualité}
+
+\begin{itemize}[leftmargin=*]
+    \item Précision OCR > 90\% pour partitions de qualité standard
+    \item Extraction mélodie correcte pour 80\% des cas simples
+\end{itemize}
+
+\subsection{Sécurité}
+
+\begin{itemize}[leftmargin=*]
+    \item Validation des uploads (type MIME, taille)
+    \item Taille max : 10 Mo pour PDF/images, 50 Mo pour audio
+    \item Nettoyage automatique des fichiers temporaires
+    \item Pas de stockage permanent des uploads utilisateur
+\end{itemize}
+
+\subsection{Accessibilité}
+
+\begin{itemize}[leftmargin=*]
+    \item Interface accessible (WCAG 2.1 niveau AA)
+    \item Support navigateurs modernes (Chrome, Firefox, Safari, Edge)
+\end{itemize}
+
+\section{Limites et Restrictions}
+
+\subsection{Limitations Connues}
+
+\begin{infobox}{Musique supportée}
+\begin{itemize}[leftmargin=*]
+    \item Mélodie monophonique uniquement
+    \item Pas de polyphonie complexe
+    \item Tempo et rythmes simples à modérés
+\end{itemize}
+\end{infobox}
+
+\begin{infobox}{Partitions}
+\begin{itemize}[leftmargin=*]
+    \item Qualité d'image suffisante pour OCR
+    \item Partitions standards (clé de sol/fa)
+    \item Pas de notations manuscrites (Phase 1)
+\end{itemize}
+\end{infobox}
+
+\begin{infobox}{Audio (Phase 2)}
+\begin{itemize}[leftmargin=*]
+    \item Mélodie claire et audible
+    \item Pas de polyphonie excessive
+    \item Qualité audio correcte (> 128 kbps)
+\end{itemize}
+\end{infobox}
+
+\subsection{Cas Non Supportés}
+
+\begin{warningbox}{Non supporté actuellement}
+\begin{itemize}[leftmargin=*]
+    \item Partitions manuscrites
+    \item Tablatures guitare en entrée
+    \item Musique atonale ou très complexe
+    \item Harmonisation automatique
+\end{itemize}
+\end{warningbox}
+
+\newpage
+
+\section{Planning de Développement}
+
+\subsection{Phase 1 : Fonctionnalités de Base}
+
+\textbf{Prioritaire}
+
+\begin{itemize}[leftmargin=*]
+    \item[$\square$] Configuration environnement (Audiveris, Lilypond)
+    \item[$\square$] Interface web Flask + Bootstrap
+    \item[$\square$] Upload et validation fichiers
+    \item[$\square$] OCR musical (Audiveris)
+    \item[$\square$] Extraction mélodie depuis partition
+    \item[$\square$] Mapping notes → tablature harmonica diatonique
+    \item[$\square$] Génération PDF avec Lilypond
+    \item[$\square$] Système de transposition basique
+\end{itemize}
+
+\textbf{Durée estimée :} 4-6 semaines
+
+\subsection{Phase 2 : Extraction Audio}
+
+\textbf{Développement ultérieur}
+
+\begin{itemize}[leftmargin=*]
+    \item[$\square$] Intégration yt-dlp (YouTube)
+    \item[$\square$] Extraction mélodie audio (librosa/essentia)
+    \item[$\square$] Transcription audio → notes
+    \item[$\square$] Tests et optimisation
+\end{itemize}
+
+\textbf{Durée estimée :} 3-4 semaines
+
+\subsection{Phase 3 : Améliorations}
+
+\textbf{Évolutions}
+
+\begin{itemize}[leftmargin=*]
+    \item[$\square$] Support harmonica chromatique
+    \item[$\square$] Détection automatique du tempo
+    \item[$\square$] Export MIDI
+    \item[$\square$] Mode batch (conversion multiple)
+    \item[$\square$] API REST
+\end{itemize}
+
+\section{Critères de Succès}
+
+\subsection{Phase 1}
+
+\begin{successbox}{Objectifs Phase 1}
+\begin{itemize}[leftmargin=*]
+    \item[$\checkmark$] L'application peut convertir une partition piano PDF simple en tablature harmonica
+    \item[$\checkmark$] La transposition automatique fonctionne
+    \item[$\checkmark$] Le PDF généré est lisible et bien formaté
+    \item[$\checkmark$] L'interface web est intuitive et responsive
+\end{itemize}
+\end{successbox}
+
+\subsection{Phase 2}
+
+\begin{successbox}{Objectifs Phase 2}
+\begin{itemize}[leftmargin=*]
+    \item[$\checkmark$] Extraction mélodie réussie sur 70\%+ des morceaux tests
+    \item[$\checkmark$] Intégration YouTube fonctionnelle
+\end{itemize}
+\end{successbox}
+
+\newpage
+
+\section{Documentation Requise}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{README.md} : Installation et utilisation
+    \item \textbf{INSTALLATION.md} : Guide détaillé d'installation des dépendances
+    \item \textbf{API.md} : Documentation API (si développée)
+    \item \textbf{CONTRIBUTING.md} : Guide de contribution
+    \item \textbf{CHANGELOG.md} : Historique des versions
+\end{itemize}
+
+\section{Maintenance et Évolution}
+
+\subsection{Support à Long Terme}
+
+\begin{itemize}[leftmargin=*]
+    \item Mises à jour des dépendances
+    \item Corrections de bugs
+    \item Améliorations basées sur retours utilisateurs
+\end{itemize}
+
+\subsection{Évolutions Possibles}
+
+\begin{itemize}[leftmargin=*]
+    \item Application mobile
+    \item Mode hors-ligne
+    \item Bibliothèque de morceaux pré-convertis
+    \item Communauté de partage
+\end{itemize}
+
+\section{Références et Ressources}
+
+\subsection{Technologies Utilisées}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Audiveris} : \url{https://github.com/Audiveris/audiveris}
+    \item \textbf{Lilypond} : \url{https://lilypond.org/}
+    \item \textbf{Flask} : \url{https://flask.palletsprojects.com/}
+    \item \textbf{Bootstrap} : \url{https://getbootstrap.com/}
+\end{itemize}
+
+\subsection{Documentation}
+
+\begin{itemize}[leftmargin=*]
+    \item Documentation Audiveris : \url{https://audiveris.github.io/audiveris/}
+    \item Documentation Lilypond : \url{https://lilypond.org/doc/}
+    \item MusicXML Standard : \url{https://www.musicxml.com/}
+\end{itemize}
+
+\newpage
+
+\section*{Historique des Versions}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|p{8cm}|}
+\hline
+\textbf{Version} & \textbf{Date} & \textbf{Modifications} \\
+\hline
+1.0 & 11/12/2025 & Version initiale du cahier des charges \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{2cm}
+
+\section*{Signatures}
+
+\vspace{1cm}
+
+\begin{tabular}{p{6cm}p{6cm}}
+\textbf{Chef de Projet} & \textbf{Date} \\
+Mathurin C. & 11 décembre 2025 \\
+& \\
+\cline{1-1}
+Signature & \\
+\end{tabular}
+
+\vfill
+
+\begin{center}
+\textcolor{secondarycolor}{\rule{10cm}{0.4pt}}\\
+\vspace{0.5cm}
+\textbf{HarpoTab} - Convertisseur de Partitions pour Harmonica\\
+\textcolor{secondarycolor}{Version 1.0 - Phase 1}\\
+\vspace{0.2cm}
+GitHub: \url{https://github.com/mathurinc/harpotab}
+\end{center}
+
+\end{document}

@@ -75,3 +75,10 @@ Thumbs.db
 *.tmp
 *.bak
 *.cache
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
