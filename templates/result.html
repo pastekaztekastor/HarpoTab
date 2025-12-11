@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}HarpoTab - Résultat{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Success Alert -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">
+                <i class="bi bi-check-circle-fill"></i> Conversion réussie !
+            </h4>
+            <p class="mb-0">Votre tablature a été générée avec succès.</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Playability Alert -->
+        {% if playability %}
+        <div class="card shadow-sm mb-4 {% if playability.is_fully_playable %}border-success{% else %}border-warning{% endif %}">
+            <div class="card-header {% if playability.is_fully_playable %}bg-success{% else %}bg-warning{% endif %} text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-{% if playability.is_fully_playable %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    Jouabilité : {{ "%.1f"|format(playability.playability_percentage) }}%
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if playability.is_fully_playable %}
+                    <div class="alert alert-success mb-0">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <strong>Parfait !</strong> Toutes les notes ({{ playability.playable_notes }}/{{ playability.total_notes }}) sont jouables sur un harmonica en {{ tonality }}.
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Attention !</strong> {{ playability.unplayable_notes }} note(s) sur {{ playability.total_notes }} ne sont pas disponibles sur un harmonica en {{ tonality }}.
+                        {% if playability.missing_notes %}
+                        <br><small class="text-muted">Notes manquantes : {{ playability.missing_notes|join(', ') }}</small>
+                        {% endif %}
+                    </div>
+
+                    {% if alternative_tonalities %}
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb"></i> Tonalités alternatives recommandées :</h6>
+                        <div class="row mt-3">
+                            {% for alt in alternative_tonalities[:3] %}
+                            <div class="col-md-4 mb-2">
+                                <div class="card {% if alt.is_fully_playable %}border-success{% endif %}">
+                                    <div class="card-body text-center p-2">
+                                        <h4 class="mb-1">{{ alt.tonality }}</h4>
+                                        <div class="progress mb-2" style="height: 20px;">
+                                            <div class="progress-bar {% if alt.is_fully_playable %}bg-success{% else %}bg-info{% endif %}"
+                                                 role="progressbar"
+                                                 style="width: {{ alt.playability }}%"
+                                                 aria-valuenow="{{ alt.playability }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                                {{ "%.0f"|format(alt.playability) }}%
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ alt.playable_notes }}/{{ alt.total_notes }} notes</small>
+                                        {% if alt.is_fully_playable %}
+                                        <br><span class="badge bg-success mt-1"><i class="bi bi-check"></i> 100% jouable</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <p class="mb-0 mt-2"><small>💡 Astuce : Revenez en arrière et choisissez une de ces tonalités pour une tablature complète.</small></p>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Download Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-download"></i> Téléchargement
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                {% if title %}
+                <h3 class="mb-3">{{ title }}</h3>
+                {% if composer %}
+                <p class="text-muted mb-4">{{ composer }}</p>
+                {% endif %}
+                {% else %}
+                <p class="lead">Votre tablature est prête !</p>
+                {% endif %}
+
+                <a href="{{ url_for('preview', filename=output_filename) }}"
+                   class="btn btn-primary btn-lg me-2"
+                   target="_blank">
+                    <i class="bi bi-eye"></i> Prévisualiser le PDF
+                </a>
+
+                <a href="{{ url_for('download', filename=output_filename) }}"
+                   class="btn btn-success btn-lg">
+                    <i class="bi bi-download"></i> Télécharger le PDF
+                </a>
+
+                {% if output_filename.endswith('_lilypond.pdf') or '_lilypond' in output_filename %}
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="bi bi-music-note-beamed"></i>
+                    <strong>Partition LilyPond</strong> - Qualité professionnelle avec exports inclus
+                    <br>
+                    <div class="btn-group mt-2" role="group">
+                        {% set midi_filename = output_filename.replace('.pdf', '.midi') %}
+                        <a href="{{ url_for('download', filename=midi_filename) }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-file-music"></i> MIDI
+                        </a>
+                        {% set ly_filename = output_filename.replace('.pdf', '.ly') %}
+                        <a href="{{ url_for('download', filename=ly_filename) }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-file-earmark-code"></i> Source LilyPond (.ly)
+                        </a>
+                    </div>
+
+                    <!-- Playback Audio -->
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <h6><i class="bi bi-play-circle"></i> Écouter la tablature</h6>
+                        <audio controls class="w-100" id="midiPlayer">
+                            <source src="{{ url_for('preview', filename=midi_filename) }}" type="audio/midi">
+                            Votre navigateur ne supporte pas le lecteur audio.
+                        </audio>
+                        <small class="text-muted d-block mt-2">
+                            💡 Astuce : Jouez en boucle pour apprendre la mélodie !
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tablature Preview - Format 2 lignes -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-music"></i> Aperçu de la tablature (Format 2 lignes)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> <strong>Format pédagogique :</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Ligne du HAUT = Notes <strong>SOUFFLÉES</strong> ↑</li>
+                        <li>Ligne du BAS = Notes <strong>ASPIRÉES</strong> ↓</li>
+                        <li>Les numéros indiquent le trou à utiliser (1-10)</li>
+                    </ul>
+                </div>
+
+                {% set measures = {} %}
+                {% for item in tablature %}
+                    {% set measure = item.measure %}
+                    {% if measure not in measures %}
+                        {% set _ = measures.update({measure: {'blow': [], 'draw': []}}) %}
+                    {% endif %}
+                    {% if item.action == 'blow' %}
+                        {% set _ = measures[measure]['blow'].append(item) %}
+                    {% elif item.action == 'draw' %}
+                        {% set _ = measures[measure]['draw'].append(item) %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="tablature-staff mt-4">
+                    {% for measure_num in measures.keys()|sort %}
+                    <div class="measure-box mb-4 p-3 border rounded">
+                        <h6 class="text-muted">Mesure {{ measure_num }}</h6>
+
+                        <!-- Ligne soufflée (haut) -->
+                        <div class="staff-line blow-line p-2 mb-1 bg-light rounded position-relative" style="border-top: 2px solid #333; min-height: 50px;">
+                            <span class="badge bg-danger position-absolute" style="top: -10px; left: -5px;">↑ SOUFFLÉ</span>
+                            <div class="notes-container d-flex align-items-center gap-3 ms-5">
+                                {% for note in measures[measure_num]['blow'] %}
+                                    {% if note.hole > 0 %}
+                                    <div class="note-item text-center">
+                                        <div class="badge bg-primary fs-4 rounded-circle" style="width: 45px; height: 45px; line-height: 45px;">
+                                            {{ note.hole }}
+                                        </div>
+                                        <small class="d-block text-muted mt-1">{{ note.note_name }}</small>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Ligne aspirée (bas) -->
+                        <div class="staff-line draw-line p-2 bg-light rounded position-relative" style="border-top: 2px solid #333; min-height: 50px;">
+                            <span class="badge bg-success position-absolute" style="top: -10px; left: -5px;">↓ ASPIRÉ</span>
+                            <div class="notes-container d-flex align-items-center gap-3 ms-5">
+                                {% for note in measures[measure_num]['draw'] %}
+                                    {% if note.hole > 0 %}
+                                    <div class="note-item text-center">
+                                        <div class="badge bg-success fs-4 rounded-circle" style="width: 45px; height: 45px; line-height: 45px;">
+                                            {{ note.hole }}
+                                        </div>
+                                        <small class="d-block text-muted mt-1">{{ note.note_name }}</small>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Table détaillée (pour référence) -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-table"></i> Détails complets
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Mesure</th>
+                                <th>Note</th>
+                                <th>Trou</th>
+                                <th>Action</th>
+                                <th>Durée</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in tablature %}
+                            <tr>
+                                <td class="text-center">{{ item.measure }}</td>
+                                <td class="text-center"><strong>{{ item.note_name }}</strong></td>
+                                <td class="text-center">
+                                    <span class="badge {% if item.action == 'blow' %}bg-primary{% else %}bg-success{% endif %}">
+                                        {{ item.hole }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% if item.action == 'blow' %}
+                                        <span class="badge bg-danger">↑ Soufflé</span>
+                                    {% elif item.action == 'draw' %}
+                                        <span class="badge bg-success">↓ Aspiré</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">?</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ item.duration }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Info -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Informations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Tonalité :</strong><br>
+                        <span class="badge bg-success">{{ tonality }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Style :</strong><br>
+                        <span class="badge bg-warning text-dark">{{ notation_style }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Fichier original :</strong><br>
+                        <small>{{ original_filename }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Notes converties :</strong><br>
+                        <span class="badge bg-info">{{ tablature|length }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Nouvelle conversion
+                </a>
+                <button type="button" class="btn btn-outline-warning ms-2" data-bs-toggle="modal" data-bs-target="#editModal">
+                    <i class="bi bi-pencil"></i> Éditer tablature
+                </button>
+            </div>
+            <div>
+                <a href="{{ url_for('preview', filename=original_filename) }}"
+                   class="btn btn-outline-secondary me-2"
+                   target="_blank">
+                    <i class="bi bi-file-earmark"></i> Partition originale
+                </a>
+                <a href="{{ url_for('preview', filename=output_filename) }}"
+                   class="btn btn-outline-primary me-2"
+                   target="_blank">
+                    <i class="bi bi-eye"></i> Prévisualiser tablature
+                </a>
+                <a href="{{ url_for('download', filename=output_filename) }}"
+                   class="btn btn-success">
+                    <i class="bi bi-download"></i> Télécharger PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Modal Édition -->
+        <div class="modal fade" id="editModal" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-pencil"></i> Éditer la tablature
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Mode édition</strong> : Modifiez les notes ci-dessous et cliquez sur "Régénérer" pour créer un nouveau PDF.
+                        </div>
+
+                        <form method="POST" action="{{ url_for('regenerate') }}" id="editForm">
+                            <input type="hidden" name="tonality" value="{{ tonality }}">
+                            <input type="hidden" name="notation_style" value="{{ notation_style }}">
+                            <input type="hidden" name="title" value="{{ title }}">
+                            <input type="hidden" name="composer" value="{{ composer }}">
+
+                            <table class="table table-sm table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 10%">Mesure</th>
+                                        <th style="width: 15%">Note</th>
+                                        <th style="width: 15%">Trou</th>
+                                        <th style="width: 15%">Action</th>
+                                        <th style="width: 15%">Durée</th>
+                                        <th style="width: 10%">Supprimer</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="editableTable">
+                                    {% for item in tablature %}
+                                    <tr data-index="{{ loop.index0 }}">
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm"
+                                                   name="measure_{{ loop.index0 }}" value="{{ item.measure }}" min="1">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm"
+                                                   name="note_{{ loop.index0 }}" value="{{ item.note_name }}">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm"
+                                                   name="hole_{{ loop.index0 }}" value="{{ item.hole }}" min="0" max="12">
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="action_{{ loop.index0 }}">
+                                                <option value="blow" {% if item.action == 'blow' %}selected{% endif %}>Soufflé (↑)</option>
+                                                <option value="draw" {% if item.action == 'draw' %}selected{% endif %}>Aspiré (↓)</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="duration_{{ loop.index0 }}">
+                                                <option value="whole" {% if item.duration == 'whole' %}selected{% endif %}>Ronde</option>
+                                                <option value="half" {% if item.duration == 'half' %}selected{% endif %}>Blanche</option>
+                                                <option value="quarter" {% if item.duration == 'quarter' %}selected{% endif %}>Noire</option>
+                                                <option value="eighth" {% if item.duration == 'eighth' %}selected{% endif %}>Croche</option>
+                                                <option value="sixteenth" {% if item.duration == 'sixteenth' %}selected{% endif %}>Double-croche</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-row">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <input type="hidden" name="tablature_count" id="tablatureCount" value="{{ tablature|length }}">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x"></i> Annuler
+                        </button>
+                        <button type="submit" form="editForm" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Régénérer PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        // Gestion suppression de lignes
+        document.querySelectorAll('.delete-row').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('tr').remove();
+            });
+        });
+        </script>
+    </div>
+</div>
+{% endblock %}

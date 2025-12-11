@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}HarpoTab - Conversion{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h2 class="mb-4">
+            <i class="bi bi-arrow-repeat"></i> Conversion en cours...
+        </h2>
+
+        <!-- Preview Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-music"></i> Aperçu de la partition
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    {% if filename.lower().endswith('.pdf') %}
+                        <embed src="{{ url_for('preview', filename=filename) }}"
+                               type="application/pdf"
+                               width="100%"
+                               height="600px">
+                    {% else %}
+                        <img src="{{ url_for('preview', filename=filename) }}"
+                             class="img-fluid rounded"
+                             alt="Partition uploadée"
+                             style="max-height: 600px;">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-gear"></i> Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Type d'harmonica :</strong><br>
+                        <span class="badge bg-primary">
+                            {{ 'Diatonique 10 trous' if harmonica_type == 'diatonic' else 'Chromatique' }}
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Tonalité :</strong><br>
+                        <span class="badge bg-success">{{ tonality }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Style de notation :</strong><br>
+                        <span class="badge bg-warning text-dark">
+                            {% if notation_style == 'arrows' %}Flèches (4↑ 5↓)
+                            {% elif notation_style == 'letters' %}Lettres (4B 5D)
+                            {% else %}Symboles (+4 -5)
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Form -->
+        <form action="{{ url_for('convert') }}" method="POST" id="convertForm">
+            <input type="hidden" name="filename" value="{{ filename }}">
+            <input type="hidden" name="harmonica_type" value="{{ harmonica_type }}">
+            <input type="hidden" name="tonality" value="{{ tonality }}">
+            <input type="hidden" name="notation_style" value="{{ notation_style }}">
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-magic"></i> Lancer la conversion
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('convertForm').addEventListener('submit', function(e) {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Conversion en cours...';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}
