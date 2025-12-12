@@ -30,10 +30,16 @@ def test_audiveris_path_custom():
 
 def test_parse_simple_musicxml():
     """Test du parsing d'un fichier MusicXML simple"""
-    ocr = AudiverisOCR()
+    # Créer un fichier temporaire pour Audiveris (pas utilisé pour ce test, juste pour init)
+    import tempfile
+    temp_audiveris = Path(tempfile.mktemp())
+    temp_audiveris.touch()
 
-    # Créer un fichier MusicXML minimal pour le test
-    test_xml = """<?xml version="1.0" encoding="UTF-8"?>
+    try:
+        ocr = AudiverisOCR(audiveris_path=str(temp_audiveris))
+
+        # Créer un fichier MusicXML minimal pour le test
+        test_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="3.1">
   <work>
     <work-title>Test Piece</work-title>
@@ -72,33 +78,39 @@ def test_parse_simple_musicxml():
 </score-partwise>
 """
 
-    # Sauvegarder le XML de test
-    test_file = Path("/tmp/test_musicxml.xml")
-    test_file.write_text(test_xml)
+        # Sauvegarder le XML de test
+        test_file = Path("/tmp/test_musicxml.xml")
+        test_file.write_text(test_xml)
 
-    # Parser le fichier
-    result = ocr.parse_musicxml(test_file)
+        # Parser le fichier
+        result = ocr.parse_musicxml(test_file)
 
-    # Vérifications
-    assert result is not None, "Le parsing devrait réussir"
-    assert 'metadata' in result, "Devrait contenir metadata"
-    assert 'parts' in result, "Devrait contenir parts"
-    assert result['metadata']['title'] == 'Test Piece', "Titre devrait être extrait"
-    assert result['metadata']['composer'] == 'Test Composer', "Compositeur devrait être extrait"
-    assert result['metadata']['time_signature'] == '4/4', "Signature rythmique devrait être 4/4"
-    assert len(result['parts']) == 1, "Devrait avoir une partie"
-    assert len(result['parts'][0]['measures']) == 1, "Devrait avoir une mesure"
-    assert len(result['parts'][0]['measures'][0]['notes']) == 1, "Devrait avoir une note"
+        # Vérifications
+        assert result is not None, "Le parsing devrait réussir"
+        assert 'metadata' in result, "Devrait contenir metadata"
+        assert 'parts' in result, "Devrait contenir parts"
+        assert result['metadata']['title'] == 'Test Piece', "Titre devrait être extrait"
+        assert result['metadata']['composer'] == 'Test Composer', "Compositeur devrait être extrait"
+        assert result['metadata']['time_signature'] == '4/4', "Signature rythmique devrait être 4/4"
+        assert len(result['parts']) == 1, "Devrait avoir une partie"
+        assert len(result['parts'][0]['measures']) == 1, "Devrait avoir une mesure"
+        assert len(result['parts'][0]['measures'][0]['notes']) == 1, "Devrait avoir une note"
 
-    note = result['parts'][0]['measures'][0]['notes'][0]
-    assert note['type'] == 'note', "Devrait être une note"
-    assert note['pitch']['step'] == 'C', "Note devrait être C"
-    assert note['pitch']['octave'] == 4, "Octave devrait être 4"
+        note = result['parts'][0]['measures'][0]['notes'][0]
+        assert note['type'] == 'note', "Devrait être une note"
+        assert note['pitch']['step'] == 'C', "Note devrait être C"
+        assert note['pitch']['octave'] == 4, "Octave devrait être 4"
 
-    # Nettoyer
-    test_file.unlink()
+        # Nettoyer
+        test_file.unlink()
 
-    print("✅ Test parsing MusicXML: OK")
+        print("✅ Test parsing MusicXML: OK")
+
+    except Exception as e:
+        pytest.fail(f"Test parsing MusicXML failed: {e}")
+    finally:
+        # Nettoyer le fichier temporaire Audiveris
+        temp_audiveris.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
