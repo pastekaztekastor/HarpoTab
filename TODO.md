@@ -1,0 +1,4 @@
+- [x] ✅ Retirer Audiveris des tests pour la CI dans test_ocr_reader.py
+- [x] 🧹 Faire du menage dans le repo (scripts de test déplacés dans `scripts/`)
+- [ ] 🐳 Mettre en place une CD avec Docker pour tester aussi Audiveris
+- [ ] 🔑 Corriger le Personal Access Token (ajouter scope `workflow`) 
