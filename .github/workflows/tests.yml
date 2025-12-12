@@ -1,0 +1,166 @@
+# =============================================================================
+# GitHub Actions Workflow - Tests automatiques pour HarpoTab
+# =============================================================================
+#
+# Ce fichier définit un "workflow" qui s'exécute automatiquement sur GitHub
+# Chaque fois qu'un événement se produit (push, pull request, etc.)
+
+# Nom du workflow (visible dans l'interface GitHub)
+name: Tests
+
+# =============================================================================
+# DÉCLENCHEURS (Quand le workflow s'exécute)
+# =============================================================================
+on:
+  # S'exécute à chaque push sur n'importe quelle branche
+  push:
+    branches: [ "**" ]  # "**" = toutes les branches
+
+  # S'exécute à chaque pull request vers la branche main
+  pull_request:
+    branches: [ "main" ]
+
+  # Permet de lancer le workflow manuellement depuis l'interface GitHub
+  workflow_dispatch:
+
+# =============================================================================
+# JOBS (Tâches à exécuter)
+# =============================================================================
+# Un workflow peut contenir plusieurs jobs qui s'exécutent en parallèle
+# Ici on a un seul job appelé "test"
+
+jobs:
+  test:
+    # Nom affiché pour ce job
+    name: Tests Python ${{ matrix.python-version }}
+
+    # ==========================================================================
+    # RUNNER (Machine virtuelle qui exécute le job)
+    # ==========================================================================
+    # GitHub fournit des machines virtuelles gratuites avec différents OS
+    # Options: ubuntu-latest, windows-latest, macos-latest
+    runs-on: ubuntu-latest
+
+    # ==========================================================================
+    # MATRICE (Tester sur plusieurs versions de Python)
+    # ==========================================================================
+    # La "strategy.matrix" permet de dupliquer le job pour chaque version
+    # Exemple: si on a 3 versions Python, GitHub va créer 3 jobs en parallèle
+    strategy:
+      # fail-fast: false = continuer les autres tests même si un échoue
+      fail-fast: false
+
+      matrix:
+        # Liste des versions Python à tester
+        python-version: ["3.11", "3.12", "3.13"]
+
+    # ==========================================================================
+    # ÉTAPES (Steps) - Actions séquentielles du job
+    # ==========================================================================
+    steps:
+      # -----------------------------------------------------------------------
+      # ÉTAPE 1: Récupérer le code du repository
+      # -----------------------------------------------------------------------
+      # "actions/checkout" est une action officielle GitHub
+      # Elle clone ton repo dans la machine virtuelle
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 2: Installer Python
+      # -----------------------------------------------------------------------
+      # "actions/setup-python" installe la version Python spécifiée
+      # ${{ matrix.python-version }} est remplacé par chaque version (3.11, 3.12, 3.13)
+      - name: Installation de Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          # Cache pip pour accélérer les builds suivants
+          cache: 'pip'
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 3: Afficher la version Python (pour debug)
+      # -----------------------------------------------------------------------
+      - name: Afficher la version Python
+        run: |
+          python --version
+          pip --version
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 4: Installer les dépendances Python
+      # -----------------------------------------------------------------------
+      # "run:" exécute des commandes shell dans la machine virtuelle
+      - name: Installation des dépendances
+        run: |
+          # Upgrade pip
+          python -m pip install --upgrade pip
+
+          # Installer les dépendances depuis requirements.txt
+          pip install -r requirements.txt
+
+          # Afficher les packages installés (utile pour debug)
+          pip list
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 5: Linter avec flake8 (vérification qualité du code)
+      # -----------------------------------------------------------------------
+      - name: Analyse du code avec flake8
+        run: |
+          # Arrêter le build si erreurs de syntaxe ou noms non définis
+          flake8 modules/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+          # Warnings (n'arrête pas le build) - complexité, longueur lignes
+          flake8 modules/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 6: Vérifier le formatage avec black
+      # -----------------------------------------------------------------------
+      - name: Vérification du formatage avec black
+        run: |
+          # --check = vérifier seulement, ne pas modifier
+          # --diff = montrer les différences
+          black --check --diff modules/ tests/
+        # continue-on-error: ne pas faire échouer le build si black trouve des problèmes
+        continue-on-error: true
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 7: Exécuter les tests avec pytest
+      # -----------------------------------------------------------------------
+      - name: Exécution des tests avec pytest
+        run: |
+          # -v = verbose (afficher chaque test)
+          # --tb=short = traceback court en cas d'erreur
+          # --color=yes = couleurs dans les logs
+          pytest tests/ -v --tb=short --color=yes
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 8: Générer un rapport de couverture de code (optionnel)
+      # -----------------------------------------------------------------------
+      - name: Génération du rapport de couverture
+        run: |
+          # --cov=modules = mesurer la couverture du dossier modules/
+          # --cov-report=term-missing = afficher les lignes non testées
+          pytest tests/ --cov=modules --cov-report=term-missing --cov-report=html
+        continue-on-error: true
+
+      # -----------------------------------------------------------------------
+      # ÉTAPE 9: Upload du rapport de couverture (optionnel)
+      # -----------------------------------------------------------------------
+      # Permet de télécharger le rapport HTML depuis l'interface GitHub
+      - name: Upload du rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()  # Upload même si les tests échouent
+        with:
+          name: coverage-report-${{ matrix.python-version }}
+          path: htmlcov/
+          retention-days: 30  # Garder 30 jours
+
+# =============================================================================
+# RÉSULTAT
+# =============================================================================
+# Une fois ce workflow commité et pushé sur GitHub:
+# 1. GitHub détecte le fichier .github/workflows/tests.yml
+# 2. À chaque push, GitHub lance 3 jobs en parallèle (Python 3.11, 3.12, 3.13)
+# 3. Chaque job exécute toutes les étapes
+# 4. Tu vois les résultats dans l'onglet "Actions" de ton repo GitHub
+# 5. Un ✅ vert ou ❌ rouge apparaît sur tes commits

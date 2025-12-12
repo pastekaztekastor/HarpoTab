@@ -82,3 +82,11 @@ Thumbs.db
 *.out
 *.toc
 *.synctex.gz
+
+# Testing & Coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+coverage.xml
+*.cover

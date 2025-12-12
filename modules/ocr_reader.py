@@ -7,6 +7,7 @@ et parser les fichiers MusicXML générés.
 import subprocess
 import logging
 import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -71,7 +72,7 @@ class AudiverisOCR:
                 command,
                 capture_output=True,
                 text=True,
-                timeout=300  # 5 minutes max
+                timeout=900  # 15 minutes max
             )
 
             if result.returncode != 0:
@@ -105,7 +106,7 @@ class AudiverisOCR:
         Parse un fichier MusicXML et extrait les informations
 
         Args:
-            musicxml_file: Fichier MusicXML généré par Audiveris
+            musicxml_file: Fichier MusicXML (.xml) ou MXL (.mxl compressé) généré par Audiveris
 
         Returns:
             Dictionnaire structuré avec les données musicales
@@ -113,7 +114,27 @@ class AudiverisOCR:
         logger.info(f"Parsing MusicXML: {musicxml_file}")
 
         try:
-            tree = ET.parse(musicxml_file)
+            # Gérer les fichiers .mxl (compressés)
+            if musicxml_file.suffix.lower() == '.mxl':
+                logger.info("Fichier MXL détecté - décompression en cours")
+                with zipfile.ZipFile(musicxml_file, 'r') as zip_ref:
+                    # Trouver le fichier XML principal (pas dans META-INF)
+                    xml_files = [f for f in zip_ref.namelist()
+                                if f.endswith('.xml') and 'META-INF' not in f]
+
+                    if not xml_files:
+                        logger.error("Aucun fichier XML trouvé dans l'archive MXL")
+                        return None
+
+                    main_xml = xml_files[0]
+                    logger.info(f"Extraction de {main_xml} depuis l'archive MXL")
+
+                    with zip_ref.open(main_xml) as xml_file:
+                        tree = ET.parse(xml_file)
+            else:
+                # Fichier XML non compressé
+                tree = ET.parse(musicxml_file)
+
             root = tree.getroot()
 
             # Extraire les métadonnées
@@ -133,6 +154,9 @@ class AudiverisOCR:
 
         except ET.ParseError as e:
             logger.error(f"Erreur de parsing XML: {e}")
+            return None
+        except zipfile.BadZipFile as e:
+            logger.error(f"Erreur: fichier MXL corrompu: {e}")
             return None
         except Exception as e:
             logger.error(f"Erreur lors du parsing MusicXML: {e}")

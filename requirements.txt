@@ -18,6 +18,7 @@ python-dotenv>=1.0.0
 
 # === Development ===
 pytest>=7.4.0
+pytest-cov>=4.1.0
 black>=23.0.0
 flake8>=6.1.0
 
