@@ -6,67 +6,82 @@
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0">
-                        <i class="bi bi-check-circle"></i> Résultat de la Conversion
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <!-- Status -->
-                    {% if status == 'success' %}
+            {% if success and file_exists %}
+                <!-- Success -->
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-check-circle"></i> Conversion Réussie !
+                        </h3>
+                    </div>
+                    <div class="card-body">
                         <div class="alert alert-success">
-                            <h5><i class="bi bi-check-circle-fill"></i> Conversion réussie !</h5>
+                            <h5><i class="bi bi-check-circle-fill"></i> Tablature générée avec succès !</h5>
                             <p class="mb-0">Votre tablature est prête à être téléchargée.</p>
                         </div>
-                    {% elif status == 'error' %}
-                        <div class="alert alert-danger">
-                            <h5><i class="bi bi-exclamation-triangle-fill"></i> Erreur</h5>
-                            <p class="mb-0">{{ message }}</p>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-warning">
-                            <h5><i class="bi bi-hourglass-split"></i> En cours...</h5>
-                            <p class="mb-0">{{ message }}</p>
-                        </div>
-                    {% endif %}
 
-                    <!-- File Info -->
-                    <div class="mb-4">
-                        <h5>Fichier traité</h5>
-                        <p><i class="bi bi-file-earmark"></i> <code>{{ filename }}</code></p>
-                    </div>
+                        <!-- File Info -->
+                        <div class="mb-4">
+                            <h5><i class="bi bi-file-earmark-pdf"></i> Fichier généré</h5>
+                            <p class="mb-0"><code>{{ filename }}</code></p>
+                        </div>
 
-                    <!-- Download Button (if success) -->
-                    {% if status == 'success' %}
-                        <div class="d-grid gap-2 mb-3">
+                        <!-- Download Button -->
+                        <div class="d-grid gap-2 mb-4">
                             <a href="{{ url_for('download', filename=filename) }}" class="btn btn-primary btn-lg">
                                 <i class="bi bi-download"></i> Télécharger le PDF
                             </a>
                         </div>
 
-                        <!-- Preview (future) -->
+                        <!-- Preview Placeholder -->
                         <div class="card bg-light">
-                            <div class="card-body text-center">
-                                <p class="text-muted">
-                                    <i class="bi bi-file-pdf" style="font-size: 3rem;"></i>
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-file-pdf text-primary" style="font-size: 4rem;"></i>
+                                <p class="text-muted mt-3 mb-0">
+                                    Partition avec tablature synchronisée
                                 </p>
-                                <p class="text-muted">Aperçu du PDF à venir</p>
+                                <p class="text-muted small">Format PDF professionnel généré par Lilypond</p>
                             </div>
                         </div>
-                    {% endif %}
 
-                    <!-- Actions -->
-                    <div class="mt-4">
-                        <a href="{{ url_for('convert') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-repeat"></i> Nouvelle conversion
-                        </a>
-                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-house"></i> Retour à l'accueil
-                        </a>
+                        <!-- Actions -->
+                        <div class="mt-4 d-flex gap-2">
+                            <a href="{{ url_for('convert') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-repeat"></i> Nouvelle conversion
+                            </a>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Retour à l'accueil
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            {% else %}
+                <!-- Error or File Not Found -->
+                <div class="card shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> Erreur
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger">
+                            <h5><i class="bi bi-exclamation-triangle-fill"></i> Fichier non trouvé</h5>
+                            <p class="mb-0">Le fichier demandé n'existe pas ou a été supprimé.</p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-4 d-flex gap-2">
+                            <a href="{{ url_for('convert') }}" class="btn btn-primary">
+                                <i class="bi bi-arrow-repeat"></i> Nouvelle conversion
+                            </a>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Retour à l'accueil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
