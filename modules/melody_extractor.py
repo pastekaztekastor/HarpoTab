@@ -50,12 +50,21 @@ class MelodyExtractor:
         # Extraire toutes les notes de la partie
         melody_notes = self._extract_notes_from_part(main_part)
 
+        # Récupérer les métadonnées complètes
+        metadata = musicxml_data.get('metadata', {})
+
         result = {
             'notes': melody_notes,
-            'metadata': musicxml_data.get('metadata', {}),
+            'metadata': metadata,
             'source_file': musicxml_data.get('source_file'),
             'part_id': main_part['id'],
-            'total_measures': len(main_part['measures'])
+            'total_measures': len(main_part['measures']),
+            # Ajouter time_signature et tempo au niveau racine pour faciliter l'accès
+            'time_signature': metadata.get('time_signature', '4/4'),
+            'tempo': metadata.get('tempo', 120),
+            'key': metadata.get('key'),
+            'composer': metadata.get('composer'),
+            'title': metadata.get('title')
         }
 
         logger.info(f"Mélodie extraite: {len(melody_notes)} notes/événements")

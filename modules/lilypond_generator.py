@@ -94,9 +94,9 @@ class LilypondGenerator:
         # Extraire les métadonnées
         title = metadata.get('title', 'Sans titre')
         composer = metadata.get('composer', '')
-        key = metadata.get('key', 'C').lower()
+        key = metadata.get('key', 'C').lower() if metadata.get('key') else 'c'
         time_sig = metadata.get('time_signature', '4/4')
-        tempo = metadata.get('tempo', 120)
+        tempo = metadata.get('tempo') or 120  # Gérer None
         harmonica_type = metadata.get('harmonica_type', 'diatonic')
         harmonica_key = metadata.get('harmonica_key', 'C')
         transposition = metadata.get('transposition', 0)
@@ -231,14 +231,14 @@ harmonicaTabs = \\lyricmode {
         for note in melody:
             # Gérer les silences
             if note.get('type') == 'rest':
-                duration = note.get('duration', 4)
+                duration = self._convert_duration_to_lilypond(note)
                 notes.append(f"r{duration}")
                 continue
 
             # Convertir la note en notation Lilypond
             pitch = note.get('pitch', 'C').lower()
             octave = note.get('octave', 4)
-            duration = note.get('duration', 4)
+            duration = self._convert_duration_to_lilypond(note)
             alter = note.get('alter', 0)
 
             # Gestion des altérations
@@ -263,6 +263,47 @@ harmonicaTabs = \\lyricmode {
             notes.append(note_str)
 
         return ' '.join(notes)
+
+    def _convert_duration_to_lilypond(self, note: Dict[str, Any]) -> int:
+        """
+        Convertit la durée de note en notation Lilypond
+
+        Args:
+            note: Dictionnaire contenant 'note_type' ou 'duration'
+
+        Returns:
+            Durée Lilypond: 1 (ronde), 2 (blanche), 4 (noire), 8 (croche), 16 (double croche)
+        """
+        note_type = note.get('note_type', '')
+
+        # Mapping des types MusicXML vers Lilypond
+        type_mapping = {
+            'whole': 1,
+            'half': 2,
+            'quarter': 4,
+            'eighth': 8,
+            '16th': 16,
+            'sixteenth': 16,
+            '32nd': 32,
+            'thirty-second': 32
+        }
+
+        if note_type in type_mapping:
+            return type_mapping[note_type]
+
+        # Fallback: utiliser duration (ancienne méthode)
+        # Supposer divisions=2 pour convertir
+        duration = note.get('duration', 2)
+        if duration >= 8:
+            return 1  # ronde
+        elif duration >= 4:
+            return 2  # blanche
+        elif duration >= 2:
+            return 4  # noire
+        elif duration >= 1:
+            return 8  # croche
+        else:
+            return 16  # double croche
 
     def _format_tablature(self, tabs: List[Dict[str, Any]]) -> str:
         """Formate la tablature en lyrics Lilypond"""
