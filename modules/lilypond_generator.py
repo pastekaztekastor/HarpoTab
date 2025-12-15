@@ -87,18 +87,73 @@ class LilypondGenerator:
         Returns:
             Contenu du fichier .ly
         """
-        # TODO: Générer le fichier Lilypond
-        # - Header avec métadonnées
-        # - Portée de mélodie
-        # - Lyrics avec tablature
-        # - Accords si disponibles
-        # - Mise en page
+        # Formater les notes et la tablature
+        melody_notes = self._format_melody(melody)
+        tablature_lyrics = self._format_tablature(tabs)
 
-        template = self._get_lilypond_template()
+        # Extraire les métadonnées
+        title = metadata.get('title', 'Sans titre')
+        composer = metadata.get('composer', '')
+        key = metadata.get('key', 'C').lower()
+        time_sig = metadata.get('time_signature', '4/4')
+        tempo = metadata.get('tempo', 120)
+        harmonica_type = metadata.get('harmonica_type', 'diatonic')
+        harmonica_key = metadata.get('harmonica_key', 'C')
+        transposition = metadata.get('transposition', 0)
 
-        # TODO: Remplir le template avec les données
+        # Construire le fichier Lilypond
+        ly_content = f'''\\version "2.24.0"
 
-        raise NotImplementedError("Génération fichier Lilypond - À implémenter")
+\\header {{
+  title = "{title}"
+  composer = "{composer}"
+  subtitle = "Harmonica {harmonica_type.capitalize()} en {harmonica_key}"
+  tagline = "Généré par HarpoTab - https://github.com/mathurinc/harpotab"
+}}
+
+\\paper {{
+  #(set-paper-size "a4")
+}}
+
+melody = \\relative c' {{
+  \\key {key} \\major
+  \\time {time_sig}
+  \\tempo 4 = {tempo}
+
+  {melody_notes}
+}}
+
+harmonicaTabs = \\lyricmode {{
+  {tablature_lyrics}
+}}
+
+\\score {{
+  \\new Staff = "melody" <<
+    \\new Voice = "melodySinger" {{
+      \\melody
+    }}
+    \\new Lyrics \\lyricsto "melodySinger" {{
+      \\harmonicaTabs
+    }}
+  >>
+  \\layout {{
+    \\context {{
+      \\Lyrics
+      \\override LyricText.font-name = "monospace"
+      \\override LyricText.font-size = #-1
+    }}
+  }}
+  \\midi {{ }}
+}}
+'''
+
+        if transposition != 0:
+            ly_content = ly_content.replace(
+                '\\header {',
+                f'\\header {{\n  instrument = "Transposé de {transposition:+d} demi-tons"'
+            )
+
+        return ly_content
 
     def _get_lilypond_template(self) -> str:
         """Retourne le template de base Lilypond"""
@@ -171,17 +226,88 @@ harmonicaTabs = \\lyricmode {
 
     def _format_melody(self, melody: List[Dict[str, Any]]) -> str:
         """Formate la mélodie en syntaxe Lilypond"""
-        # TODO: Convertir notes en syntaxe Lilypond
-        # Ex: [{note: 'C', octave: 4, duration: 4}] -> "c4"
+        notes = []
 
-        raise NotImplementedError("Format mélodie Lilypond - À implémenter")
+        for note in melody:
+            # Gérer les silences
+            if note.get('type') == 'rest':
+                duration = note.get('duration', 4)
+                notes.append(f"r{duration}")
+                continue
+
+            # Convertir la note en notation Lilypond
+            pitch = note.get('pitch', 'C').lower()
+            octave = note.get('octave', 4)
+            duration = note.get('duration', 4)
+            alter = note.get('alter', 0)
+
+            # Gestion des altérations
+            if alter == 1:
+                pitch += 'is'  # dièse
+            elif alter == -1:
+                pitch += 'es'  # bémol (sauf pour a et e)
+                if pitch == 'aes':
+                    pitch = 'as'
+                elif pitch == 'ees':
+                    pitch = 'es'
+
+            # Gestion des octaves (Lilypond: c' = C4, c'' = C5, c = C3)
+            octave_mark = ''
+            if octave >= 4:
+                octave_mark = "'" * (octave - 3)
+            elif octave < 3:
+                octave_mark = "," * (3 - octave)
+
+            # Assembler la note
+            note_str = f"{pitch}{octave_mark}{duration}"
+            notes.append(note_str)
+
+        return ' '.join(notes)
 
     def _format_tablature(self, tabs: List[Dict[str, Any]]) -> str:
         """Formate la tablature en lyrics Lilypond"""
-        # TODO: Convertir tablature en lyrics
-        # Ex: [{hole: 4, direction: 'blow'}] -> "4↑"
+        lyrics = []
 
-        raise NotImplementedError("Format tablature Lilypond - À implémenter")
+        for tab in tabs:
+            # Gérer les silences
+            if tab.get('type') == 'rest':
+                lyrics.append('_')
+                continue
+
+            hole = tab.get('hole', '?')
+            direction = tab.get('direction', 'blow')
+            technique = tab.get('technique')
+
+            # Symboles pour direction (utiliser des lettres ASCII pour Lilypond)
+            if direction == 'blow':
+                arrow = 'B'  # Blow
+            elif direction == 'draw':
+                arrow = 'D'  # Draw
+            else:
+                arrow = '.'
+
+            # Construire le texte de la tablature
+            tab_text = f'"{hole}{arrow}'
+
+            # Ajouter indication de technique si nécessaire
+            if technique:
+                if technique == 'overblow':
+                    tab_text += 'ob'
+                elif technique == 'overdraw':
+                    tab_text += 'od'
+                elif 'bend' in technique:
+                    # Notation bend avec apostrophes
+                    if 'full_half' in technique:
+                        tab_text += "'''"
+                    elif 'full' in technique:
+                        tab_text += "''"
+                    elif 'half' in technique:
+                        tab_text += "'"
+
+            tab_text += '"'
+            lyrics.append(tab_text)
+
+        return ' '.join(lyrics)
 
 
 def generate_pdf(

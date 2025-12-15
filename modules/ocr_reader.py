@@ -82,14 +82,28 @@ class AudiverisOCR:
             logger.info("Audiveris terminé avec succès")
 
             # Chercher le fichier MusicXML généré
-            musicxml_files = list(output_dir.glob("*.mxl")) + list(output_dir.glob("*.xml"))
+            # Audiveris génère un fichier avec le même nom de base que l'entrée
+            base_name = input_file.stem
+            expected_mxl = output_dir / f"{base_name}.mxl"
+            expected_xml = output_dir / f"{base_name}.xml"
 
-            if not musicxml_files:
-                logger.error("Aucun fichier MusicXML généré")
-                return None
+            if expected_mxl.exists():
+                musicxml_file = expected_mxl
+            elif expected_xml.exists():
+                musicxml_file = expected_xml
+            else:
+                # Fallback: chercher n'importe quel fichier MusicXML récent
+                musicxml_files = sorted(
+                    list(output_dir.glob("*.mxl")) + list(output_dir.glob("*.xml")),
+                    key=lambda f: f.stat().st_mtime,
+                    reverse=True
+                )
+                if not musicxml_files:
+                    logger.error("Aucun fichier MusicXML généré")
+                    return None
+                musicxml_file = musicxml_files[0]
+                logger.warning(f"Fichier attendu '{base_name}.mxl' non trouvé, utilisation de: {musicxml_file.name}")
 
-            # Parser le premier fichier trouvé
-            musicxml_file = musicxml_files[0]
             logger.info(f"Fichier MusicXML trouvé: {musicxml_file}")
 
             return self.parse_musicxml(musicxml_file)

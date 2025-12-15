@@ -46,12 +46,25 @@ class MusicAnalyzer:
         Returns:
             Tonalité (ex: 'C', 'G', 'Am', etc.)
         """
-        # TODO: Algorithme de détection de tonalité
-        # - Analyse des altérations
-        # - Fréquence des notes
-        # - Note de début/fin
+        # Implémentation basique : analyse de la première et dernière note
+        # TODO: Améliorer avec analyse harmonique complète
 
-        raise NotImplementedError("Détection tonalité - À implémenter")
+        if not melody:
+            return 'C'  # Par défaut
+
+        # Filtrer les silences
+        notes_only = [n for n in melody if n.get('type') == 'note']
+
+        if not notes_only:
+            return 'C'
+
+        # Prendre la première note comme tonique (très basique)
+        first_note = notes_only[0]
+        pitch = first_note.get('pitch', 'C')
+
+        # Retourner la note sans l'octave
+        logger.info(f"Tonalité détectée (basique): {pitch}")
+        return pitch
 
     def get_range(self, melody: List[Dict[str, Any]]) -> Tuple[str, str]:
         """
@@ -63,9 +76,36 @@ class MusicAnalyzer:
         Returns:
             Tuple (note_min, note_max) ex: ('C4', 'G5')
         """
-        # TODO: Calculer min/max de la mélodie
+        # Filtrer les silences
+        notes_only = [n for n in melody if n.get('type') == 'note']
 
-        raise NotImplementedError("Calcul tessiture - À implémenter")
+        if not notes_only:
+            return ('C4', 'C4')
+
+        # Calculer min et max
+        min_note = min(notes_only, key=lambda n: (n.get('octave', 4), self._pitch_to_semitone(n.get('pitch', 'C'))))
+        max_note = max(notes_only, key=lambda n: (n.get('octave', 4), self._pitch_to_semitone(n.get('pitch', 'C'))))
+
+        min_str = f"{min_note.get('pitch', 'C')}{min_note.get('octave', 4)}"
+        max_str = f"{max_note.get('pitch', 'C')}{max_note.get('octave', 4)}"
+
+        logger.info(f"Tessiture: {min_str} - {max_str}")
+        return (min_str, max_str)
+
+    def _pitch_to_semitone(self, pitch: str) -> int:
+        """Convertit une note en demi-tons (C=0)"""
+        notes = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
+        base_note = pitch[0]
+        semitone = notes.get(base_note, 0)
+
+        # Gérer les altérations
+        if len(pitch) > 1:
+            if '#' in pitch:
+                semitone += 1
+            elif 'b' in pitch:
+                semitone -= 1
+
+        return semitone
 
     def detect_chords(self, music_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
@@ -77,12 +117,10 @@ class MusicAnalyzer:
         Returns:
             Liste d'accords [{name, position, duration}, ...]
         """
-        # TODO: Détection d'accords
-        # - Analyser la main gauche (piano)
-        # - Identifier les accords communs
-        # - Chiffrage américain (C, Am, G7, etc.)
-
-        raise NotImplementedError("Détection accords - À implémenter")
+        # Pour l'instant, retourner une liste vide
+        # TODO: Analyser les parties d'accompagnement (main gauche piano, etc.)
+        logger.info("Détection d'accords désactivée (optionnel)")
+        return []
 
     def detect_tempo(self, music_data: Dict[str, Any]) -> int:
         """
