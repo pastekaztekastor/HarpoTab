@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}HarpoTab - Conversion en cours{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-hourglass-split"></i> Conversion en cours...
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Progression globale -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Progression globale</strong>
+                            <span id="overall-progress-text">0%</span>
+                        </div>
+                        <div class="progress" style="height: 30px;">
+                            <div id="overall-progress-bar"
+                                 class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                 role="progressbar"
+                                 style="width: 0%"
+                                 aria-valuenow="0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            <i class="bi bi-clock"></i> Temps écoulé: <span id="time-elapsed">0:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Étapes détaillées -->
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Étapes du pipeline</h5>
+                            <div id="steps-container">
+                                <!-- Les étapes seront ajoutées dynamiquement ici -->
+                                <div class="text-center text-muted">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                    <p class="mt-2">Initialisation...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message de complétion (caché au début) -->
+                    <div id="completion-message" class="alert alert-success mt-4" style="display: none;">
+                        <h5><i class="bi bi-check-circle-fill"></i> Conversion terminée !</h5>
+                        <p class="mb-0">Redirection vers le résultat...</p>
+                    </div>
+
+                    <!-- Message d'erreur (caché au début) -->
+                    <div id="error-message" class="alert alert-danger mt-4" style="display: none;"></div>
+
+                    <!-- Actions -->
+                    <div class="mt-4">
+                        <a href="{{ url_for('convert') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Annuler
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infos supplémentaires -->
+            <div class="alert alert-info mt-4">
+                <h6><i class="bi bi-info-circle"></i> Que se passe-t-il ?</h6>
+                <ul class="mb-0 small">
+                    <li><strong>OCR Musical</strong> : Audiveris lit votre partition et extrait les notes</li>
+                    <li><strong>Extraction Mélodie</strong> : La ligne mélodique principale est isolée</li>
+                    <li><strong>Analyse</strong> : Détection de la tonalité et de la tessiture</li>
+                    <li><strong>Transposition</strong> : Adaptation automatique à votre harmonica si nécessaire</li>
+                    <li><strong>Tablature</strong> : Conversion des notes en positions d'harmonica</li>
+                    <li><strong>PDF</strong> : Génération du document final avec Lilypond</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/progress.js') }}"></script>
+<script>
+    // Récupérer le session_id depuis la variable Jinja2
+    const sessionId = '{{ session_id }}';
+    const filename = '{{ filename }}';
+
+    if (sessionId && sessionId !== 'None') {
+        // Démarrer le suivi de progression
+        const tracker = new ProgressTracker(sessionId, 'progress-container');
+        tracker.start();
+
+        // Stocker le filename pour la redirection
+        if (filename) {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.get('filename')) {
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('filename', filename);
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+    } else {
+        document.getElementById('error-message').textContent = 'Session ID manquant';
+        document.getElementById('error-message').style.display = 'block';
+    }
+</script>
+{% endblock %}
