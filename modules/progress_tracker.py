@@ -192,54 +192,62 @@ class ProgressTracker:
             else:
                 step.progress = 100 if step.status == ProgressStatus.COMPLETED else 50
 
+    def _calculate_overall_progress(self) -> int:
+        """Calcule le progrès global (version interne sans lock)"""
+        if not self.steps:
+            return 0
+
+        total_steps = len(self.steps)
+        completed_steps = sum(1 for s in self.steps.values() if s.status == ProgressStatus.COMPLETED)
+
+        return int((completed_steps / total_steps) * 100)
+
     def get_overall_progress(self) -> int:
         """Calcule le progrès global du pipeline"""
         with self.lock:
-            if not self.steps:
-                return 0
+            return self._calculate_overall_progress()
 
-            total_steps = len(self.steps)
-            completed_steps = sum(1 for s in self.steps.values() if s.status == ProgressStatus.COMPLETED)
-
-            return int((completed_steps / total_steps) * 100)
+    def _build_status(self) -> Dict[str, Any]:
+        """Construit le statut (version interne sans lock - le lock doit déjà être acquis)"""
+        return {
+            'session_id': self.session_id,
+            'overall_progress': self._calculate_overall_progress(),
+            'elapsed_time': int(time.time() - self.start_time),
+            'current_step': self.current_step,
+            'steps': [
+                {
+                    'id': step.id,
+                    'name': step.name,
+                    'status': step.status.value,
+                    'progress': step.progress,
+                    'message': step.message,
+                    'substeps': [
+                        {
+                            'id': substep.id,
+                            'name': substep.name,
+                            'status': substep.status.value,
+                            'progress': substep.progress,
+                            'message': substep.message
+                        }
+                        for substep in step.substeps
+                    ]
+                }
+                for step in self.steps.values()
+            ]
+        }
 
     def get_status(self) -> Dict[str, Any]:
         """Retourne le statut complet de la progression"""
         with self.lock:
-            return {
-                'session_id': self.session_id,
-                'overall_progress': self.get_overall_progress(),
-                'elapsed_time': int(time.time() - self.start_time),
-                'current_step': self.current_step,
-                'steps': [
-                    {
-                        'id': step.id,
-                        'name': step.name,
-                        'status': step.status.value,
-                        'progress': step.progress,
-                        'message': step.message,
-                        'substeps': [
-                            {
-                                'id': substep.id,
-                                'name': substep.name,
-                                'status': substep.status.value,
-                                'progress': substep.progress,
-                                'message': substep.message
-                            }
-                            for substep in step.substeps
-                        ]
-                    }
-                    for step in self.steps.values()
-                ]
-            }
+            return self._build_status()
 
     def add_callback(self, callback: Callable):
         """Ajoute un callback appelé à chaque changement"""
         self.callbacks.append(callback)
 
     def _notify_change(self):
-        """Notifie tous les callbacks d'un changement"""
-        status = self.get_status()
+        """Notifie tous les callbacks d'un changement (le lock doit déjà être acquis)"""
+        status = self._build_status()  # Utiliser la version interne
         for callback in self.callbacks:
             try:
                 callback(status)

@@ -404,7 +404,9 @@ def create_app(config_name='default'):
 
         # Fonction à exécuter dans le thread
         def conversion_thread():
+            logger.info(f"🔥 Thread de conversion démarré pour session {session_id}")
             try:
+                logger.info(f"Début de process_conversion pour {upload_path.name}")
                 conversion_result = process_conversion(
                     input_file=upload_path,
                     harmonica_type=harmonica_type,
@@ -412,18 +414,21 @@ def create_app(config_name='default'):
                     output_dir=Config.OUTPUT_FOLDER,
                     tracker=tracker
                 )
+                logger.info(f"process_conversion terminé: success={conversion_result.get('success')}")
 
                 # Nettoyer le tracker après 5 minutes
                 threading.Timer(300, lambda: remove_tracker(session_id)).start()
 
             except Exception as e:
-                logger.error(f"Erreur dans le thread de conversion: {str(e)}")
+                logger.error(f"❌ Erreur dans le thread de conversion: {str(e)}")
                 logger.error(traceback.format_exc())
                 # Le tracker aura déjà l'erreur marquée via tracker.error_step()
 
         # Lancer la conversion dans un thread séparé
+        logger.info(f"Lancement du thread de conversion pour session {session_id}")
         thread = threading.Thread(target=conversion_thread, daemon=True)
         thread.start()
+        logger.info(f"Thread démarré (daemon={thread.daemon}, alive={thread.is_alive()})")
 
         # Rediriger immédiatement vers la page de progression
         return redirect(url_for('progress_page', session_id=session_id, filename=output_filename))
@@ -480,42 +485,65 @@ def create_app(config_name='default'):
         import time
 
         def generate():
+            logger.info(f"SSE stream démarré pour session {session_id}")
             tracker = get_tracker(session_id)
             if not tracker:
+                logger.error(f"Tracker non trouvé pour session {session_id}")
                 yield f"data: {json.dumps({'error': 'Session not found'})}\n\n"
                 return
 
+            logger.info(f"Tracker trouvé pour session {session_id}")
+            # Envoyer un message initial immédiatement
+            yield f": keepalive\n\n"
+
             # Envoyer le status initial
-            yield f"data: {json.dumps(tracker.get_status())}\n\n"
+            try:
+                initial_status = tracker.get_status()
+                logger.info(f"Status initial: {initial_status['overall_progress']}%")
+                yield f"data: {json.dumps(initial_status)}\n\n"
+            except Exception as e:
+                logger.error(f"Erreur get_status initial: {e}")
+                logger.error(traceback.format_exc())
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                return
 
             # Polling toutes les 0.5 secondes
-            last_status = None
-            for _ in range(300):  # Max 2.5 minutes
+            last_status = initial_status
+            for i in range(300):  # Max 2.5 minutes
                 time.sleep(0.5)
 
                 tracker = get_tracker(session_id)
                 if not tracker:
+                    logger.warning(f"Tracker disparu pour session {session_id}")
                     break
 
                 current_status = tracker.get_status()
 
-                # Envoyer seulement si changement
-                if current_status != last_status:
+                # Toujours envoyer une mise à jour (même si pas de changement) toutes les 10 itérations
+                # pour éviter les timeouts
+                should_send = (current_status != last_status) or (i % 10 == 0)
+
+                if should_send:
+                    if current_status != last_status:
+                        logger.info(f"Progress update: {current_status['overall_progress']}% (iteration {i})")
                     yield f"data: {json.dumps(current_status)}\n\n"
                     last_status = current_status
 
                 # Arrêter si 100%
                 if current_status['overall_progress'] >= 100:
+                    logger.info(f"Progression terminée à 100% pour session {session_id}")
                     break
 
-        return Response(
+            logger.info(f"SSE stream terminé pour session {session_id}")
+
+        response = Response(
             stream_with_context(generate()),
-            mimetype='text/event-stream',
-            headers={
-                'Cache-Control': 'no-cache',
-                'X-Accel-Buffering': 'no'
-            }
+            mimetype='text/event-stream'
         )
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['X-Accel-Buffering'] = 'no'
+        response.headers['Connection'] = 'keep-alive'
+        return response
 
     # Gestionnaires d'erreurs
     @app.errorhandler(404)
@@ -539,4 +567,5 @@ def allowed_file(filename):
 if __name__ == '__main__':
     # Mode développement
     app = create_app('development')
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Désactiver le reloader pour éviter les problèmes avec les threads
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False, threaded=True)

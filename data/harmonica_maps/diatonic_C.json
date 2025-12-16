@@ -33,7 +33,7 @@
     "5": {
       "blow": {"note": "E", "octave": 5},
       "draw": {"note": "F", "octave": 5},
-      "draw_bend_half": {"note": "E", "octave": 5},
+      "draw_bend_half": {"note": "Fb", "octave": 5},
       "blow_bend_half": {"note": "Eb", "octave": 5}
     },
     "6": {
@@ -58,7 +58,7 @@
     "9": {
       "blow": {"note": "G", "octave": 6},
       "draw": {"note": "F", "octave": 6},
-      "draw_bend_half": {"note": "E", "octave": 6},
+      "draw_bend_half": {"note": "Fb", "octave": 6},
       "blow_bend_half": {"note": "Gb", "octave": 6},
       "blow_overblow": {"note": "Ab", "octave": 6}
     },

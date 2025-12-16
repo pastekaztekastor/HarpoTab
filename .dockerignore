@@ -1,0 +1,66 @@
+# =============================================================================
+# .dockerignore - Exclut les fichiers inutiles du contexte Docker
+# =============================================================================
+# Réduit le temps de build et la taille de l'image
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.pytest_cache/
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Fichiers temporaires
+temp/
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation lourde (on garde .md)
+*.pdf
+*.tex
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.claude/
+
+# Fichiers de test locaux
+OCRtest*.pdf
+OCRtest*.png
+OCRtest*.omr
+ERRinstallDocker.txt
+
+# Docker
+Dockerfile.monolith
+docker-compose.yml
+
+# Environnement
+.env
+.env.local
+
+# Divers
+*.bak
+*.old

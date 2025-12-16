@@ -1,0 +1,91 @@
+# =============================================================================
+# Docker Compose - HarpoTab avec Audiveris séparé
+# =============================================================================
+# Architecture microservices :
+#   - app : Application Flask légère
+#   - audiveris : Service OCR dédié
+#
+# Utilisation :
+#   docker-compose up --build       # Build et lancer
+#   docker-compose up               # Lancer (sans rebuild)
+#   docker-compose down             # Arrêter
+#   docker-compose logs -f app      # Voir les logs de l'app
+#   docker-compose logs -f audiveris # Voir les logs d'Audiveris
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application Flask (légère, rebuild rapide)
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: harpotab-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Code source (pour le dev, commentez en prod)
+      - ./modules:/app/modules
+      - ./app.py:/app/app.py
+      - ./config.py:/app/config.py
+      # Données partagées avec audiveris
+      - uploads:/app/static/uploads
+      - outputs:/app/static/outputs
+      # Données persistantes
+      - data:/app/data
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - AUDIVERIS_SERVICE_URL=http://audiveris:8080
+    depends_on:
+      - audiveris
+    restart: unless-stopped
+    networks:
+      - harpotab-network
+
+  # ---------------------------------------------------------------------------
+  # Service Audiveris OCR (stable, ne change pas souvent)
+  # ---------------------------------------------------------------------------
+  audiveris:
+    build:
+      context: ./docker/audiveris
+      dockerfile: Dockerfile
+    container_name: harpotab-audiveris
+    ports:
+      - "8080:8080"
+    volumes:
+      # Partage des fichiers avec l'app
+      - uploads:/uploads
+      - outputs:/outputs
+    environment:
+      - JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+      - TESSDATA_PREFIX=/usr/share/tessdata
+    restart: unless-stopped
+    networks:
+      - harpotab-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# =============================================================================
+# Volumes partagés
+# =============================================================================
+volumes:
+  uploads:
+    driver: local
+  outputs:
+    driver: local
+  data:
+    driver: local
+
+# =============================================================================
+# Réseau
+# =============================================================================
+networks:
+  harpotab-network:
+    driver: bridge

@@ -94,7 +94,8 @@
 
     if (sessionId && sessionId !== 'None') {
         // Démarrer le suivi de progression
-        const tracker = new ProgressTracker(sessionId, 'progress-container');
+        // Note: on ne passe pas de containerId car on n'utilise pas ce paramètre
+        const tracker = new ProgressTracker(sessionId, null);
         tracker.start();
 
         // Stocker le filename pour la redirection

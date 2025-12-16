@@ -115,7 +115,7 @@ class LilypondGenerator:
   #(set-paper-size "a4")
 }}
 
-melody = \\relative c' {{
+melody = {{
   \\key {key} \\major
   \\time {time_sig}
   \\tempo 4 = {tempo}
@@ -148,9 +148,12 @@ harmonicaTabs = \\lyricmode {{
 '''
 
         if transposition != 0:
+            transp_text = f"Transposé de {transposition:+d} demi-tons"
+            if abs(transposition) >= 7:
+                transp_text += " (importante transposition)"
             ly_content = ly_content.replace(
                 '\\header {',
-                f'\\header {{\n  instrument = "Transposé de {transposition:+d} demi-tons"'
+                f'\\header {{\n  instrument = "{transp_text}"'
             )
 
         return ly_content
@@ -236,27 +239,52 @@ harmonicaTabs = \\lyricmode {
                 continue
 
             # Convertir la note en notation Lilypond
-            pitch = note.get('pitch', 'C').lower()
+            pitch = note.get('pitch', 'C')
             octave = note.get('octave', 4)
             duration = self._convert_duration_to_lilypond(note)
             alter = note.get('alter', 0)
 
-            # Gestion des altérations
-            if alter == 1:
-                pitch += 'is'  # dièse
-            elif alter == -1:
-                pitch += 'es'  # bémol (sauf pour a et e)
-                if pitch == 'aes':
-                    pitch = 'as'
-                elif pitch == 'ees':
+            # Gérer les altérations déjà présentes dans le nom de la note (ex: Bb, C#)
+            if 'b' in pitch and len(pitch) > 1:  # Bémol déjà dans le nom
+                # Ex: "Bb" -> "bes", "Eb" -> "es", "Ab" -> "as"
+                base_note = pitch[0].lower()
+                if base_note == 'b':
+                    pitch = 'bes'
+                elif base_note == 'e':
                     pitch = 'es'
+                elif base_note == 'a':
+                    pitch = 'as'
+                else:
+                    pitch = base_note + 'es'
+            elif '#' in pitch:  # Dièse déjà dans le nom
+                # Ex: "C#" -> "cis", "F#" -> "fis"
+                base_note = pitch[0].lower()
+                pitch = base_note + 'is'
+            else:
+                # Note simple, convertir en minuscule
+                pitch = pitch.lower()
 
-            # Gestion des octaves (Lilypond: c' = C4, c'' = C5, c = C3)
+                # Appliquer les altérations si présentes via 'alter'
+                if alter == 1:
+                    pitch += 'is'  # dièse
+                elif alter == -1:
+                    # Pour les bémols en Lilypond
+                    if pitch == 'b':
+                        pitch = 'bes'
+                    elif pitch == 'e':
+                        pitch = 'es'
+                    elif pitch == 'a':
+                        pitch = 'as'
+                    else:
+                        pitch += 'es'
+
+            # Gestion des octaves en mode absolu (Lilypond: c = C3, c' = C4, c'' = C5)
             octave_mark = ''
-            if octave >= 4:
+            if octave > 3:
                 octave_mark = "'" * (octave - 3)
             elif octave < 3:
                 octave_mark = "," * (3 - octave)
+            # Si octave == 3, pas de marque (c = C3)
 
             # Assembler la note
             note_str = f"{pitch}{octave_mark}{duration}"
@@ -333,17 +361,17 @@ harmonicaTabs = \\lyricmode {
             # Ajouter indication de technique si nécessaire
             if technique:
                 if technique == 'overblow':
-                    tab_text += 'ob'
+                    tab_text += ' ob'
                 elif technique == 'overdraw':
-                    tab_text += 'od'
+                    tab_text += ' od'
                 elif 'bend' in technique:
-                    # Notation bend avec apostrophes
+                    # Notation bend plus visible avec des symboles
                     if 'full_half' in technique:
-                        tab_text += "'''"
+                        tab_text += '↓↓↓'  # Bend 1.5 tons
                     elif 'full' in technique:
-                        tab_text += "''"
+                        tab_text += '↓↓'   # Bend 1 ton
                     elif 'half' in technique:
-                        tab_text += "'"
+                        tab_text += '↓'     # Bend 1/2 ton
 
             tab_text += '"'
             lyrics.append(tab_text)

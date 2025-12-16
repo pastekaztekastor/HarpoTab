@@ -1,0 +1,91 @@
+{
+  "type": "chromatic",
+  "key": "C",
+  "description": "Harmonica chromatique 12 trous en C",
+  "holes": 12,
+  "tuning": "chromatic",
+  "notes": {
+    "1": {
+      "blow": {"note": "C", "octave": 4},
+      "blow_slide": {"note": "Db", "octave": 4},
+      "draw": {"note": "D", "octave": 4},
+      "draw_slide": {"note": "Eb", "octave": 4}
+    },
+    "2": {
+      "blow": {"note": "E", "octave": 4},
+      "blow_slide": {"note": "F", "octave": 4},
+      "draw": {"note": "G", "octave": 4},
+      "draw_slide": {"note": "Ab", "octave": 4}
+    },
+    "3": {
+      "blow": {"note": "A", "octave": 4},
+      "blow_slide": {"note": "Bb", "octave": 4},
+      "draw": {"note": "B", "octave": 4},
+      "draw_slide": {"note": "C", "octave": 5}
+    },
+    "4": {
+      "blow": {"note": "C", "octave": 5},
+      "blow_slide": {"note": "Db", "octave": 5},
+      "draw": {"note": "D", "octave": 5},
+      "draw_slide": {"note": "Eb", "octave": 5}
+    },
+    "5": {
+      "blow": {"note": "E", "octave": 5},
+      "blow_slide": {"note": "F", "octave": 5},
+      "draw": {"note": "G", "octave": 5},
+      "draw_slide": {"note": "Ab", "octave": 5}
+    },
+    "6": {
+      "blow": {"note": "A", "octave": 5},
+      "blow_slide": {"note": "Bb", "octave": 5},
+      "draw": {"note": "B", "octave": 5},
+      "draw_slide": {"note": "C", "octave": 6}
+    },
+    "7": {
+      "blow": {"note": "C", "octave": 6},
+      "blow_slide": {"note": "Db", "octave": 6},
+      "draw": {"note": "D", "octave": 6},
+      "draw_slide": {"note": "Eb", "octave": 6}
+    },
+    "8": {
+      "blow": {"note": "E", "octave": 6},
+      "blow_slide": {"note": "F", "octave": 6},
+      "draw": {"note": "G", "octave": 6},
+      "draw_slide": {"note": "Ab", "octave": 6}
+    },
+    "9": {
+      "blow": {"note": "A", "octave": 6},
+      "blow_slide": {"note": "Bb", "octave": 6},
+      "draw": {"note": "B", "octave": 6},
+      "draw_slide": {"note": "C", "octave": 7}
+    },
+    "10": {
+      "blow": {"note": "C", "octave": 7},
+      "blow_slide": {"note": "Db", "octave": 7},
+      "draw": {"note": "D", "octave": 7},
+      "draw_slide": {"note": "Eb", "octave": 7}
+    },
+    "11": {
+      "blow": {"note": "E", "octave": 7},
+      "blow_slide": {"note": "F", "octave": 7},
+      "draw": {"note": "G", "octave": 7},
+      "draw_slide": {"note": "Ab", "octave": 7}
+    },
+    "12": {
+      "blow": {"note": "A", "octave": 7},
+      "blow_slide": {"note": "Bb", "octave": 7},
+      "draw": {"note": "B", "octave": 7},
+      "draw_slide": {"note": "C", "octave": 8}
+    }
+  },
+  "range": {
+    "min": {"note": "C", "octave": 4},
+    "max": {"note": "C", "octave": 8}
+  },
+  "techniques": {
+    "blow": "Souffler",
+    "draw": "Aspirer",
+    "blow_slide": "Souffler avec slide",
+    "draw_slide": "Aspirer avec slide"
+  }
+}

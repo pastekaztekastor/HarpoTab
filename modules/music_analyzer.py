@@ -66,7 +66,7 @@ class MusicAnalyzer:
         logger.info(f"Tonalité détectée (basique): {pitch}")
         return pitch
 
-    def get_range(self, melody: List[Dict[str, Any]]) -> Tuple[str, str]:
+    def get_range(self, melody: List[Dict[str, Any]]) -> Dict[str, str]:
         """
         Calcule la tessiture (étendue) de la mélodie
 
@@ -74,13 +74,13 @@ class MusicAnalyzer:
             melody: Liste de notes
 
         Returns:
-            Tuple (note_min, note_max) ex: ('C4', 'G5')
+            Dict {'lowest': note_min, 'highest': note_max} ex: {'lowest': 'C4', 'highest': 'G5'}
         """
         # Filtrer les silences
         notes_only = [n for n in melody if n.get('type') == 'note']
 
         if not notes_only:
-            return ('C4', 'C4')
+            return {'lowest': 'C4', 'highest': 'C4'}
 
         # Calculer min et max
         min_note = min(notes_only, key=lambda n: (n.get('octave', 4), self._pitch_to_semitone(n.get('pitch', 'C'))))
@@ -90,7 +90,7 @@ class MusicAnalyzer:
         max_str = f"{max_note.get('pitch', 'C')}{max_note.get('octave', 4)}"
 
         logger.info(f"Tessiture: {min_str} - {max_str}")
-        return (min_str, max_str)
+        return {'lowest': min_str, 'highest': max_str}
 
     def _pitch_to_semitone(self, pitch: str) -> int:
         """Convertit une note en demi-tons (C=0)"""
